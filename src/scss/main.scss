@@ -6,7 +6,7 @@
 
 // подключения компонентов страницы
 @import "./components/header";
-@import "./components/popup-update";
+@import "./components/popups";
 
 @keyframes lds-ring {
   0% {
@@ -299,3 +299,4 @@
   font-style: italic;
   color: #B0B0B0;
 }
+
