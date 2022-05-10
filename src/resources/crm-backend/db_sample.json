@@ -1,0 +1,71 @@
+[
+  {
+    "id": "123455",
+    "name": "Денис",
+    "surname": "Скворцов",
+    "middlename": "Юрьевич",
+    "created": "2021-02-21T12:41",
+    "updated": "2021-02-21T14:50",
+    "contacts":[
+      {"type": "phone", "value": "+79991231111"},
+      {"type": "phone_add", "value": "+79991231111"},
+      {"type": "mail", "value": "user1@gmail.com"},
+      {"type": "vk", "value": "vk.com/id112233"},
+      {"type": "fb", "value": "fb.com/id123456"},
+      {"type": "phone", "value": "+79991231111"},
+      {"type": "phone_add", "value": "+79991231111"},
+      {"type": "mail", "value": "user1@gmail.com"},
+      {"type": "vk", "value": "vk.com/id112233"},
+      {"type": "fb", "value": "fb.com/id123456"}
+      ]
+  },
+  {
+    "id": "123456",
+    "name": "Арсений",
+    "surname": "Куприянов",
+    "middlename": "Валерьевич",
+    "created": "2021-01-28T16:40",
+    "updated": "2021-02-02T17:01",
+    "contacts":[
+      {"type": "phone", "value": "+79992222222"},
+      {"type": "mail", "value": "user2@gmail.com"}
+      ]
+  },
+  {
+    "id": "123457",
+    "name": "Людмила",
+    "surname": "Константинопольская",
+    "middlename": "Александровна",
+    "created": "2021-01-20T14:01",
+    "updated": "2021-01-21T14:59",
+    "contacts":[
+      {"type": "phone",     "value": "+79993333333"},
+      {"type": "mail",   "value": "user3@mail.com"},
+      {"type": "fb",      "value": "fb.com/id123456"}
+      ]
+  },
+  {
+    "id": "123458",
+    "name": "Олег",
+    "surname": "Дмитриевский",
+    "middlename": "Алексеевич",
+    "created": "2021-01-14T16:50",
+    "updated": "2021-01-18T16:55",
+    "contacts":[
+      {"type": "phone",     "value": "+79991231111"}
+      ]
+  },
+  {
+    "id": "123459",
+    "name": "Татьяна",
+    "surname": "Александрова",
+    "middlename": "Павловна",
+    "created": "2021-01-11T12:45",
+    "updated": "2021-01-11T14:11",
+    "contacts":[
+      {"type": "phone",     "value": "+79854430000"},
+      {"type": "mail",   "value": "user1@gmail.com"},
+      {"type": "vk",      "value": "vk.com/id112233"}
+      ]
+  }
+]

@@ -1,0 +1,39 @@
+.header {
+  position: fixed;
+  z-index: 99;
+  padding: 19px 0;
+  width: 100%;
+  background: #FFFFFF;
+  box-shadow: 0px 9.03012px 27.0904px rgba(176, 190, 197, 0.32), 0px 3.38629px 5.64383px rgba(176, 190, 197, 0.32);
+  &__logo {
+    margin-right: 53px;
+  }
+  &__form {
+    width: 100%;
+    max-width: 581px;
+  }
+  &__search {
+    padding: 12px 16px;
+    width: 100%;
+    border: 1px solid rgba(51, 51, 51, 0.2);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 19px;
+  }
+  &__search::placeholder {
+    color: #B0B0B0;
+  }
+  @include mobile {
+    padding: 8px 0;
+    &__search {
+      display: none;
+    }
+    &__logo {
+      margin: 0;
+      width: 24px;
+    }
+    &__form {
+      width: 0;
+    }
+  }
+}
