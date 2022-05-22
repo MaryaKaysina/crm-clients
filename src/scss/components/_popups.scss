@@ -255,6 +255,10 @@
   &__icon {
     fill: #B0B0B0;
   }
+  &__contact.is-disable {
+    opacity: .5;
+    cursor: auto;
+  }
 }
 .choices {
   margin: 0;

@@ -239,6 +239,7 @@ function sortedClients(clients, asc = true, field1 = 'id', field2 = '', field3 =
 }
 
 function actionsClients() {
+  const page = document.querySelector('.page__body');
   const btnAddClient = document.querySelector('.main__btn--load');
   const btnsUpdate = document.querySelectorAll('.tbody__btn--update');
   const popupUpdate = document.querySelector('.popup-update');
@@ -285,6 +286,7 @@ function actionsClients() {
           </svg>
         </button>`;
 
+      page.classList.add('is-popup');
       popupUpdate.classList.add('is-active');
 
       const popupUpdateClose = popupUpdate.querySelector('.update__close');
@@ -293,11 +295,13 @@ function actionsClients() {
       popupUpdateClose.addEventListener('click', e => {
         e.preventDefault();
         popupUpdate.classList.remove('is-active');
+        page.classList.remove('is-popup');
       });
 
       popupUpdate.addEventListener('click', e => {
         e.preventDefault();
         if(e.target.classList.contains('popup-update')) {
+          page.classList.remove('is-popup');
           popupUpdate.classList.remove('is-active');
         }
       });
@@ -312,17 +316,20 @@ function actionsClients() {
 
         popupDeleteClose.addEventListener('click', e => {
           e.preventDefault();
+          page.classList.remove('is-popup');
           popupDelete.classList.remove('is-active');
         });
 
         popupDeleteCancel.addEventListener('click', e => {
           e.preventDefault();
+          page.classList.remove('is-popup');
           popupDelete.classList.remove('is-active');
         });
 
         popupDelete.addEventListener('click', e => {
           e.preventDefault();
           if(e.target.classList.contains('popup-delete')) {
+            page.classList.remove('is-popup');
             popupDelete.classList.remove('is-active');
           }
         });
@@ -331,6 +338,7 @@ function actionsClients() {
           e.preventDefault();
           await deletedClient(clientId);
           await createClients();
+          page.classList.remove('is-popup');
           popupDelete.classList.remove('is-active');
         });
       });
@@ -339,6 +347,7 @@ function actionsClients() {
 
   btnAddClient.addEventListener('click', e => {
     e.preventDefault();
+    page.classList.add('is-popup');
     popupNew.classList.add('is-active');
 
     const popupAddClose = popupNew.querySelector('.new__close');
@@ -348,17 +357,20 @@ function actionsClients() {
 
     popupAddClose.addEventListener('click', e => {
       e.preventDefault();
+      page.classList.remove('is-popup');
       popupNew.classList.remove('is-active');
     });
 
     popupAddCancel.addEventListener('click', e => {
       e.preventDefault();
+      page.classList.remove('is-popup');
       popupNew.classList.remove('is-active');
     });
 
     popupNew.addEventListener('click', e => {
       e.preventDefault();
       if(e.target.classList.contains('popup-new')) {
+        page.classList.remove('is-popup');
         popupNew.classList.remove('is-active');
       }
     });
@@ -374,6 +386,12 @@ function actionsClients() {
     popupAddContact.addEventListener('click', e => {
       e.preventDefault();
       console.log('add');
+      const newContactHide = document.querySelector('.new__row-contact.is-hide');
+      if (newContactHide) {
+        newContactHide.classList.remove('is-hide');
+      } else {
+        popupAddContact.classList.add('is-disable');
+      }
 
     })
   })

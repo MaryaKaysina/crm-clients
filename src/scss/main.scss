@@ -17,9 +17,17 @@
   }
 }
 
+.page__body.is-popup {
+  overflow: hidden;
+}
+
+.page__body.is-popup .main {
+  padding: 0;
+}
+
 .main {
   padding-top: 131px;
-  min-height: 100vh;
+  min-height: calc(100vh - 131px);
   background: #F5F5F5;
   overflow-x: auto;
   &__title {
@@ -70,7 +78,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 1185px;
     height: 300px;
     background: #ffffff;
     opacity: 0;
@@ -95,6 +102,9 @@
       margin-bottom: 20px;
       font-size: 18px;
       line-height: 25px;
+    }
+    &__btn {
+      margin-left: 30%;
     }
   }
 }
@@ -267,6 +277,7 @@
   &__icon {
     fill: #9873FF;
     opacity: 0.7;
+    transition: opacity .3s ease-in-out;
     &--phone path {
       fill: #FFFFFF;
     }
@@ -299,4 +310,12 @@
   font-style: italic;
   color: #B0B0B0;
 }
-
+@include for-desktop {
+  .list {
+    &__link:hover {
+      & .list__icon {
+        opacity: 1;
+      }
+    }
+  }
+}
