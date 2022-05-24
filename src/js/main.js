@@ -2,6 +2,7 @@ import './_vendor';
 import vars from './_vars';
 import './_functions';
 import './_components';
+import { once } from 'gulp';
 
 const searchInput = document.querySelector('.header__search');
 const titleTable = document.querySelectorAll('.thead__title');
@@ -240,14 +241,76 @@ function sortedClients(clients, asc = true, field1 = 'id', field2 = '', field3 =
 
 function actionsClients() {
   const page = document.querySelector('.page__body');
-  const btnAddClient = document.querySelector('.main__btn--load');
+
   const btnsUpdate = document.querySelectorAll('.tbody__btn--update');
   const popupUpdate = document.querySelector('.popup-update');
   const popupDelete = document.querySelector('.popup-delete');
-  const popupNew = document.querySelector('.popup-new');
   const popupWrapContainer = popupUpdate.querySelector('.update__wrap');
 
+  //add client
+  const btnAddClient = document.querySelector('.main__btn--load');
+  const popupNew = document.querySelector('.popup-new');
+  const popupAddClose = popupNew.querySelector('.new__close');
+  const popupAddCancel = popupNew.querySelector('.new__cancel');
+  const popupAddContact = popupNew.querySelector('.new__contact');
+  const newTypeContacts = document.querySelectorAll('.new__type-contact');
+
   let clientId;
+
+  // function closePopupClick() {
+  //   page.classList.remove('is-popup');
+  //   popupNew.classList.remove('is-active');
+  // };
+
+  btnAddClient.addEventListener('click', e => {
+    e.preventDefault();
+
+    page.classList.add('is-popup');
+    popupNew.classList.add('is-active');
+    popupAddClose.focus();
+
+    // popupAddClose.addEventListener('click', closePopupClick, { once: true });
+
+    popupAddClose.addEventListener('click', e => {
+      e.preventDefault();
+      page.classList.remove('is-popup');
+      popupNew.classList.remove('is-active');
+    });
+
+    popupAddCancel.addEventListener('click', e => {
+      e.preventDefault();
+      page.classList.remove('is-popup');
+      popupNew.classList.remove('is-active');
+    });
+
+    popupNew.addEventListener('click', e => {
+      e.preventDefault();
+      if(e.target.classList.contains('popup-new')) {
+        page.classList.remove('is-popup');
+        popupNew.classList.remove('is-active');
+      }
+    });
+
+    newTypeContacts.forEach(newTypeContact => {
+      const choicesnewTypeContact = new Choices(newTypeContact, {
+        searchEnabled: false,
+        itemSelectText: '',
+        shouldSort: false
+      });
+    })
+
+    popupAddContact.addEventListener('click', e => {
+      e.preventDefault();
+      console.log('add');
+      const newContactHide = document.querySelector('.new__row-contact.is-hide');
+      if (newContactHide) {
+        newContactHide.classList.remove('is-hide');
+      } else {
+        popupAddContact.classList.add('is-disable');
+      }
+
+    })
+  })
 
   btnsUpdate.forEach(btn => {
     btn.addEventListener('click', async e => {
@@ -344,57 +407,6 @@ function actionsClients() {
       });
     })
   });
-
-  btnAddClient.addEventListener('click', e => {
-    e.preventDefault();
-    page.classList.add('is-popup');
-    popupNew.classList.add('is-active');
-
-    const popupAddClose = popupNew.querySelector('.new__close');
-    const popupAddCancel = popupNew.querySelector('.new__cancel');
-    const popupAddContact = popupNew.querySelector('.new__contact');
-    const newTypeContacts = document.querySelectorAll('.new__type-contact');
-
-    popupAddClose.addEventListener('click', e => {
-      e.preventDefault();
-      page.classList.remove('is-popup');
-      popupNew.classList.remove('is-active');
-    });
-
-    popupAddCancel.addEventListener('click', e => {
-      e.preventDefault();
-      page.classList.remove('is-popup');
-      popupNew.classList.remove('is-active');
-    });
-
-    popupNew.addEventListener('click', e => {
-      e.preventDefault();
-      if(e.target.classList.contains('popup-new')) {
-        page.classList.remove('is-popup');
-        popupNew.classList.remove('is-active');
-      }
-    });
-
-    newTypeContacts.forEach(newTypeContact => {
-      const choicesnewTypeContact = new Choices(newTypeContact, {
-        searchEnabled: false,
-        itemSelectText: '',
-        shouldSort: false
-      });
-    })
-
-    popupAddContact.addEventListener('click', e => {
-      e.preventDefault();
-      console.log('add');
-      const newContactHide = document.querySelector('.new__row-contact.is-hide');
-      if (newContactHide) {
-        newContactHide.classList.remove('is-hide');
-      } else {
-        popupAddContact.classList.add('is-disable');
-      }
-
-    })
-  })
 }
 
 async function createClients() {

@@ -21,15 +21,10 @@
   overflow: hidden;
 }
 
-.page__body.is-popup .main {
-  padding: 0;
-}
-
 .main {
   padding-top: 131px;
-  min-height: calc(100vh - 131px);
+  min-height: 100vh;
   background: #F5F5F5;
-  overflow-x: auto;
   &__title {
     @include p-reset;
     margin-bottom: 26px;
@@ -38,9 +33,16 @@
     line-height: 33px;
     color: #333333;
   }
-  &__table {
+  &__table-block {
     position: relative;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  &__table {
+    margin-bottom: 20px;
+    width: 100%;
     min-width: 738px;
   }
   &__btn {
@@ -103,9 +105,6 @@
       font-size: 18px;
       line-height: 25px;
     }
-    &__btn {
-      margin-left: 30%;
-    }
   }
 }
 .load {
@@ -159,9 +158,12 @@
     }
     &--active {
       color: #9873FF;
-      & .thead__icon {
+      &[data-asc="true"] .thead__icon {
         transform: rotate(0);
       }
+    }
+    &--link {
+      color: inherit;
     }
   }
   &__icon {

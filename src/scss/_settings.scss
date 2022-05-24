@@ -34,15 +34,8 @@ a {
 .site-container {
   position: relative;
   min-height: 100vh;
-  &::after {
-    content: "";
-    position: absolute;
-    top: 229px;
-    right: 0;
-    height: 39.2%;
-    width: 15%;
-    background: linear-gradient(90deg, rgba(255, 255, 255, .5) 0%, rgba(51, 51, 51, .5) 100%);
-  }
+  max-width: 100vw;
+  overflow: hidden;
 }
 
 .is-hidden {
@@ -108,9 +101,9 @@ a {
   }
 }
 
-.js-focus-visible :focus:not(.focus-visible) {
-  outline: none;
-}
+// .js-focus-visible :focus:not(.focus-visible) {
+//   outline: none;
+// }
 
 .dis-scroll {
   position: fixed;

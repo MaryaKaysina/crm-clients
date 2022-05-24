@@ -1,45 +1,51 @@
 <main class="main">
   <div class="container container--main">
     <h1 class="main__title">Клиенты</h1>
-    <table class="main__table" border="0" cellspacing="0" cellpadding="0">
-      <thead class="main__thead thead">
-        <tr>
-          <th scope="col" class="thead__title thead__title--id thead__title--active" data-asc="true">ID
-            <svg class="thead__icon" width="12" height="12">
-              <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" fill="#9873FF"/>
-            </svg>
-          </th>
-          <th class="thead__title thead__title--name" scope="col" data-asc="false">Фамилия Имя Отчество
-            <svg class="thead__icon" width="12" height="12">
-              <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" fill="#9873FF"/>
-            </svg>
-          </th>
-          <th class="thead__title thead__title--created" scope="col" data-asc="false">Дата и время создания
-            <svg class="thead__icon" width="12" height="12">
-              <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" fill="#9873FF"/>
-            </svg>
-          </th>
-          <th class="thead__title thead__title--updated" scope="col" data-asc="false">Последние изменения
-            <svg class="thead__icon" width="12" height="12">
-              <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" fill="#9873FF"/>
-            </svg>
-          </th>
-          <th class="thead__title thead__title--contacts" scope="col">Контакты</th>
-          <th class="thead__title thead__title--actions" scope="col">Действия</th>
-        </tr>
-      </thead>
-      <tbody class="main__tbody tbody">
-      </tbody>
-      <tbody class="main__load load is-active">
-        <tr>
-          <td>
-            <svg class="load__icon" width="100" height="100">
-              <path d="M4.00025 40.0005C4.00025 59.8825 20.1182 76.0005 40.0002 76.0005C59.8822 76.0005 76.0002 59.8825 76.0002 40.0005C76.0002 20.1185 59.8823 4.00049 40.0003 4.00049C35.3513 4.00048 30.9082 4.88148 26.8282 6.48648" stroke-miterlimit="10" stroke-linecap="round"/>
-            </svg>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="main__table-block">
+      <table class="main__table" border="0" cellspacing="0" cellpadding="0">
+        <thead class="main__thead thead">
+          <tr>
+            <th scope="col" class="thead__title thead__title--id thead__title--active" data-asc="true">
+              <a href="#" class="thead__title--link">ID</a>
+              <svg class="thead__icon" width="12" height="12">
+                <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" fill="#9873FF"/>
+              </svg>
+            </th>
+            <th class="thead__title thead__title--name" scope="col" data-asc="false">
+              <a href="#" class="thead__title--link">Фамилия Имя Отчество</a>
+              <svg class="thead__icon" width="12" height="12">
+                <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" fill="#9873FF"/>
+              </svg>
+            </th>
+            <th class="thead__title thead__title--created" scope="col" data-asc="false">
+              <a href="#" class="thead__title--link">Дата и время создания</a>
+              <svg class="thead__icon" width="12" height="12">
+                <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" fill="#9873FF"/>
+              </svg>
+            </th>
+            <th class="thead__title thead__title--updated" scope="col" data-asc="false">
+              <a href="#" class="thead__title--link">Последние изменения</a>
+              <svg class="thead__icon" width="12" height="12">
+                <path d="M2 6L2.705 6.705L5.5 3.915L5.5 10L6.5 10L6.5 3.915L9.29 6.71L10 6L6 2L2 6Z" fill="#9873FF"/>
+              </svg>
+            </th>
+            <th class="thead__title thead__title--contacts" scope="col">Контакты</th>
+            <th class="thead__title thead__title--actions" scope="col">Действия</th>
+          </tr>
+        </thead>
+        <tbody class="main__tbody tbody">
+        </tbody>
+        <tbody class="main__load load is-active">
+          <tr>
+            <td>
+              <svg class="load__icon" width="100" height="100">
+                <path d="M4.00025 40.0005C4.00025 59.8825 20.1182 76.0005 40.0002 76.0005C59.8822 76.0005 76.0002 59.8825 76.0002 40.0005C76.0002 20.1185 59.8823 4.00049 40.0003 4.00049C35.3513 4.00048 30.9082 4.88148 26.8282 6.48648" stroke-miterlimit="10" stroke-linecap="round"/>
+              </svg>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <button class="main__btn main__btn--load">Добавить клиента</button>
   </div>
 </main>

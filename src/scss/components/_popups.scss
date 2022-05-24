@@ -105,6 +105,14 @@
     top: 15px;
     right: 15px;
     fill: #B0B0B0;
+    &:focus,
+    &:focus-visible {
+      outline: 2px solid #9873ff;
+    }
+  }
+  &__icon {
+    position: relative;
+    display: block;
   }
 }
 
