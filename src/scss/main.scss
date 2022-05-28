@@ -17,12 +17,8 @@
   }
 }
 
-.page__body.is-popup {
-  overflow: hidden;
-}
-
 .main {
-  padding-top: 131px;
+  padding-top: 30px;
   min-height: 100vh;
   background: #F5F5F5;
   &__title {
@@ -49,7 +45,7 @@
     @include btn-reset;
     position: relative;
     margin: 0 auto;
-    margin-bottom: 176px;
+    margin-bottom: 50px;
     padding: 12px 26px;
     padding-left: 58px;
     border: 1px solid #9873FF;
@@ -73,14 +69,14 @@
   }
   &__load {
     position: absolute;
-    top: 23px;
+    top: 40px;
     bottom: 0;
     left: 0;
     right: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 300px;
+    height: 390px;
     background: #ffffff;
     opacity: 0;
     visibility: hidden;
@@ -99,7 +95,6 @@
     }
   }
   @include mobile {
-    padding-top: 73px;
     &__title {
       margin-bottom: 20px;
       font-size: 18px;
@@ -227,6 +222,7 @@
     color: #333333;
     &--id {
       padding-left: 20px;
+      padding-right: 20px;
       font-size: 12px;
       line-height: 16px;
       color: #B0B0B0;
@@ -270,6 +266,7 @@
 .list {
   @include list-reset;
   display: flex;
+  flex-wrap: wrap;
   &__item.is-hide {
     display: none;
   }

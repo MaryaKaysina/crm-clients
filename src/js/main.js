@@ -1,9 +1,3 @@
-import './_vendor';
-import vars from './_vars';
-import './_functions';
-import './_components';
-import { once } from 'gulp';
-
 const searchInput = document.querySelector('.header__search');
 const titleTable = document.querySelectorAll('.thead__title');
 const titleTableId = document.querySelector('.thead__title--id');
@@ -11,6 +5,18 @@ const titleTableName = document.querySelector('.thead__title--name');
 const titleTableCreated = document.querySelector('.thead__title--created');
 const titleTableUpdated = document.querySelector('.thead__title--updated');
 
+// secondary functions
+function checkHeight() {
+  const popup = document.querySelector('.popup.is-active .new__wrap');
+  const heightPopup = popup.offsetHeight;
+  const heightYiewport = window.innerHeight;
+
+  if(heightPopup >= heightYiewport - 20) {
+    popup.classList.add('is-height');
+  }
+};
+
+// function api server
 async function loadClientsSearch(search = '') {
   const response = await fetch('http://localhost:5500/api/clients');
   const data = await response.json();
@@ -27,12 +33,27 @@ async function loadClient(id) {
   return client;
 };
 
+async function addNewClient(surname, name, middlename, contacts) {
+  const response = await fetch('http://localhost:5500/api/clients', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      surname: surname,
+      name: name,
+      middlename: middlename,
+      contacts: contacts
+    })
+  });
+  const data = await response.json();
+};
+
 async function deletedClient(id) {
   const response = await fetch(`http://localhost:5500/api/clients/${id}`, {
     method: 'DELETE',
   });
 };
 
+// function handler contacts clients from server
 function checkLoadPhone(value, isHide = false, index, indexContact, type = 'Телефон') {
   const contact = `<li class="list__item ${isHide ? 'is-hide' : ''}">
       <a href="tel:${value}" class="list__link list__link--${index}${indexContact}" data-contact="${type}: ${value}" aria-label="Позвонить">
@@ -94,7 +115,7 @@ function loadContacts(type, value, isHide, index, indexContact) {
   if(type === 'Phone') {
     contact += checkLoadPhone(value, isHide, index, indexContact);
   };
-  if(type === 'Mail') {
+  if(type === 'Email') {
     contact += checkLoadMail(value, isHide, index, indexContact);
   };
   if(type === 'VK') {
@@ -109,6 +130,7 @@ function loadContacts(type, value, isHide, index, indexContact) {
   return contact;
 };
 
+// added sort & tooltips in table
 function clickTitleTable(field, arr, sortedField1, sortedField2, sortedField3) {
   const asc = field.dataset.asc === 'true' ? false : true;
   field.dataset.asc = asc;
@@ -118,7 +140,7 @@ function clickTitleTable(field, arr, sortedField1, sortedField2, sortedField3) {
   });
   field.classList.add('thead__title--active');
   sortedClients(arr, asc, sortedField1, sortedField2, sortedField3);
-}
+};
 
 function addTooltipContacs() {
   const contactsItem = document.querySelectorAll('.list__link');
@@ -134,15 +156,18 @@ function addTooltipContacs() {
       });
     }
   }
-}
+};
 
+// created table clients
 function createClientsElements(data) {
   const container = document.querySelector('.container--main');
   const mainBtn = document.querySelector('.main__btn');
   const notFoundClient = document.querySelector('.clients-not-found');
   const tableBlock = document.querySelector('.main__tbody');
   const loadBlock = document.querySelector('.main__load');
+
   tableBlock.innerHTML = '';
+  tableBlock.style.height = '370px';
 
   if(data.length > 0) {
     data.forEach((item, index) => {
@@ -180,7 +205,6 @@ function createClientsElements(data) {
         allContacts += moreContactsView;
       }
 
-
       tr.innerHTML = `<td scope="row" class="tbody__title tbody__title--id">${item.id}</td>
           <td scope="row" class="tbody__title tbody__title--name">${name}</td>
           <td scope="row" class="tbody__title tbody__title--created">${createdDate} <span class="tbody__time">${createdTime}</span></td>
@@ -205,20 +229,49 @@ function createClientsElements(data) {
     p.classList.add('clients-not-found');
     p.innerHTML = `Поиск не дал результатов, попробуйте уточнить ФИО клиента`;
 
-    console.log(notFoundClient === null);
     if(notFoundClient === null) {
       container.insertBefore(p, mainBtn)
     }
   }
 
+  const contactMore = document.querySelectorAll('.list__link--more');
+
+  contactMore.forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const listContacts = el.parentElement.parentElement;
+      const items = listContacts.querySelectorAll('.is-hide');
+      items.forEach(item => {
+        item.classList.remove('is-hide');
+      })
+      el.parentElement.classList.add('is-hide');
+    })
+  })
+
+  addTooltipContacs();
+  loadBlock.classList.remove('is-active');
+  mainBtn.classList.remove('main__btn--load');
+};
+
+function createTableHideLoad(data) {
+  const tableBlock = document.querySelector('.main__tbody');
+  const loadBlock = document.querySelector('.main__load');
+  const mainBtn = document.querySelector('.main__btn');
+
+  tableBlock.innerHTML = '';
+  tableBlock.style.height = '370px';
 
   let timerId = setTimeout(function() {
     loadBlock.classList.remove('is-active');
     mainBtn.classList.remove('main__btn--load');
+    tableBlock.style.height = '';
+    createClientsElements(data);
     clearTimeout(timerId);
   }, 500);
 };
 
+// created table clients
 function sortedClients(clients, asc = true, field1 = 'id', field2 = '', field3 = '') {
   const sortClients = clients.sort(function(a, b) {
     if ((a[field1] + a[field2] + a[field3]) > (b[field1] + b[field2] + b[field3])) {
@@ -232,62 +285,215 @@ function sortedClients(clients, asc = true, field1 = 'id', field2 = '', field3 =
   if(!asc) {
     const sortClientsDesc = sortClients.reverse();
     createClientsElements(sortClientsDesc);
-    addTooltipContacs();
     return;
   }
   createClientsElements(sortClients);
-  addTooltipContacs();
-}
+};
 
-function actionsClients() {
+// added table clients to page
+async function createClients() {
+  const strSearch = searchInput.value;
+  const clients = await loadClientsSearch(strSearch);
+
+  sortedClients(clients);
+
+  titleTableId.onclick = function (){
+    clickTitleTable(titleTableId, clients);
+  };
+
+  titleTableName.onclick = function (){
+    clickTitleTable(titleTableName, clients, 'surname', 'name', 'middlename');
+  };
+
+  titleTableCreated.onclick = function (){
+    clickTitleTable(titleTableCreated, clients, 'created');
+  };
+
+  titleTableUpdated.onclick = function (){
+    clickTitleTable(titleTableUpdated, clients, 'updated');
+  };
+
+  deletedClientDB();
+  updateClientDB();
+};
+
+// added client to db
+function addClientDB() {
   const page = document.querySelector('.page__body');
 
-  const btnsUpdate = document.querySelectorAll('.tbody__btn--update');
-  const popupUpdate = document.querySelector('.popup-update');
-  const popupDelete = document.querySelector('.popup-delete');
-  const popupWrapContainer = popupUpdate.querySelector('.update__wrap');
-
-  //add client
   const btnAddClient = document.querySelector('.main__btn--load');
   const popupNew = document.querySelector('.popup-new');
+  const popupNewWrap = popupNew.querySelector('.new__wrap');
   const popupAddClose = popupNew.querySelector('.new__close');
   const popupAddCancel = popupNew.querySelector('.new__cancel');
+  const popupAddSave = popupNew.querySelector('.new__save');
+  const popupAddError = popupNew.querySelector('.new__error');
   const popupAddContact = popupNew.querySelector('.new__contact');
+  const popupAddInputs = popupNew.querySelectorAll('.new__input');
   const newTypeContacts = document.querySelectorAll('.new__type-contact');
 
-  let clientId;
+  function addContactField() {
+    const newContactHide = document.querySelectorAll('.new__row-contact.is-hide');
+    if (newContactHide.length > 1) {
+      newContactHide[0].classList.remove('is-hide');
 
-  // function closePopupClick() {
-  //   page.classList.remove('is-popup');
-  //   popupNew.classList.remove('is-active');
-  // };
+      const btnContactDelete = newContactHide[0].querySelector('.new__delete-contact');
+
+      btnContactDelete.addEventListener('click', () => {
+        btnContactDelete.parentElement.classList.add('is-hide');
+        const input = btnContactDelete.parentElement.querySelector('.new__value');
+        input.value = '';
+      })
+    } else if(newContactHide.length === 1) {
+      newContactHide[0].classList.remove('is-hide');
+      popupAddContact.classList.add('is-disable');
+    }
+
+    checkHeight();
+  };
+
+  function closePopupClick() {
+    popupAddInputs.forEach(input => {
+      if(input.getAttribute('value').length > 0) {
+        input.setAttribute('value','');
+        input.value = '';
+      }
+    })
+    page.classList.remove('is-popup');
+    popupNew.classList.remove('is-active');
+    const newContact = document.querySelectorAll('.new__row-contact');
+
+    newContact.forEach(el => {
+      if(!el.classList.contains('is-hide')) {
+        const newContactInput = el.querySelector('.new__value');
+        el.classList.add('is-hide');
+        newContactInput.value = '';
+      }
+    });
+    popupAddContact.removeEventListener('click', addContactField);
+    popupAddContact.classList.remove('is-disable');
+    popupNewWrap.classList.remove('is-height');
+    popupAddError.classList.remove('invalid');
+  };
+
+  function validFormCheck(popup, surname, name) {
+    const contactList = [];
+    let valid = false;
+    let error = '';
+
+    if(surname.length > 0) {
+      const reg = /^[а-яёА-ЯЁ]+$/u;
+      if(surname.match(reg)) {
+        if(name.length > 0) {
+          if(name.match(reg)) {
+            valid = true;
+
+            const contacts = popup.querySelectorAll('.new__row-contact');
+            contacts.forEach(el => {
+              if(!el.classList.contains('is-hide')) {
+                const typeContact = el.querySelector('.is-selected').dataset.value;
+                const contact = el.querySelector('.new__value').value.trim();
+
+                if(typeContact === 'Phone') {
+                  const reg = /^\+?[78][-\(]?\d{3}\)?-?\d{3}-?\d{2}-?\d{2}$/;
+                  if(contact.match(reg)) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: неверный формат телефона!';
+                  }
+                }
+                if(typeContact === 'Email') {
+                  const reg = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+                  if(contact.match(reg)) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: неверный формат e-mail!';
+                  }
+                }
+                if(typeContact === 'VK') {
+                  const reg = /^(https?:\/\/)?(www\.)?vk\.com\/(\w|\d)+?\/?$/;
+                  if(contact.match(reg)) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: неверный формат ссылки на ВК!';
+                  }
+                }
+                if(typeContact === 'FB') {
+                  const reg = /^(https?:\/\/)?(www\.)?(facebook\.|fb\.)com\/(\w|\d)+?\/?$/;
+                  if(contact.match(reg)) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: неверный формат ссылки на Фэйсбук!';
+                  }
+                }
+                if(typeContact === 'Other') {
+                  if(contact.length > 0) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: контакт не должен быть пустым!';
+                  }
+                }
+
+                contactList.push({"type": typeContact, "value": contact});
+              }
+            })
+          } else {
+            error = 'Ошибка: имя должно содержать только кирилицу!';
+          }
+        } else {
+          error = 'Ошибка: введите имя!';
+        }
+      } else {
+        error = 'Ошибка: фамилия должна содержать только кирилицу!';
+      }
+    } else {
+      error = 'Ошибка: введите фамилию!';
+    }
+
+    return {valid, error, contactList};
+  }
+
+  async function saveClient() {
+    const validSurName = popupNew.querySelector('.new__input--surname').value.trim();
+    const validName = popupNew.querySelector('.new__input--name').value.trim();
+    const validMiddleName = popupNew.querySelector('.new__input--middlename').value.trim();
+    const validForm = validFormCheck(popupNew, validSurName, validName);
+
+    if(validForm.valid) {
+      await addNewClient(validSurName, validName, validMiddleName, validForm.contactList);
+      closePopupClick();
+      createClients();
+    } else {
+      popupAddError.innerHTML = validForm.error;
+      popupAddError.classList.add('invalid');
+    }
+  };
 
   btnAddClient.addEventListener('click', e => {
     e.preventDefault();
 
     page.classList.add('is-popup');
     popupNew.classList.add('is-active');
-    popupAddClose.focus();
 
-    // popupAddClose.addEventListener('click', closePopupClick, { once: true });
-
-    popupAddClose.addEventListener('click', e => {
-      e.preventDefault();
-      page.classList.remove('is-popup');
-      popupNew.classList.remove('is-active');
+    popupAddInputs.forEach(input => {
+      input.addEventListener('change', () => {
+        input.setAttribute("value", input.value);
+      })
     });
 
-    popupAddCancel.addEventListener('click', e => {
-      e.preventDefault();
-      page.classList.remove('is-popup');
-      popupNew.classList.remove('is-active');
-    });
+    popupAddClose.addEventListener('click', closePopupClick);
+
+    popupAddCancel.addEventListener('click', closePopupClick);
 
     popupNew.addEventListener('click', e => {
       e.preventDefault();
       if(e.target.classList.contains('popup-new')) {
-        page.classList.remove('is-popup');
-        popupNew.classList.remove('is-active');
+        closePopupClick();
       }
     });
 
@@ -297,57 +503,92 @@ function actionsClients() {
         itemSelectText: '',
         shouldSort: false
       });
-    })
+    });
 
-    popupAddContact.addEventListener('click', e => {
+    popupAddContact.addEventListener('click', addContactField);
+
+    popupAddSave.addEventListener('click', saveClient);
+  });
+};
+
+// deleted client to db
+function deletedClientDB() {
+  const page = document.querySelector('.page__body');
+
+  const btnDelete = document.querySelectorAll('.tbody__btn--delete');
+  const popupDelete = document.querySelector('.popup-delete');
+
+  btnDelete.forEach(btn => {
+    btn.addEventListener('click', e => {
       e.preventDefault();
-      console.log('add');
-      const newContactHide = document.querySelector('.new__row-contact.is-hide');
-      if (newContactHide) {
-        newContactHide.classList.remove('is-hide');
-      } else {
-        popupAddContact.classList.add('is-disable');
+
+      const clientDelete = btn.parentElement.parentElement;
+      const clientId = clientDelete.querySelector('.tbody__title--id').innerHTML;
+      const popupDeleteClose = popupDelete.querySelector('.delete__close');
+      const popupDeleteCancel = popupDelete.querySelector('.delete__cancel');
+      const popupDeleteDelete = popupDelete.querySelector('.delete__delete');
+
+      async function deletedClientId() {
+        await deletedClient(clientId);
+        createClients();
+        page.classList.remove('is-popup');
+        popupDelete.classList.remove('is-active');
       }
 
-    })
+      page.classList.add('is-popup');
+      popupDelete.classList.add('is-active');
+
+      popupDeleteClose.addEventListener('click', e => {
+        e.preventDefault();
+        page.classList.remove('is-popup');
+        popupDelete.classList.remove('is-active');
+      });
+
+      popupDeleteCancel.addEventListener('click', e => {
+        e.preventDefault();
+        page.classList.remove('is-popup');
+        popupDelete.classList.remove('is-active');
+      });
+
+      popupDelete.addEventListener('click', e => {
+        e.preventDefault();
+        if(e.target.classList.contains('popup-delete')) {
+          page.classList.remove('is-popup');
+          popupDelete.classList.remove('is-active');
+        }
+      });
+
+      popupDeleteDelete.addEventListener('click', deletedClientId);
+    });
   })
+}
+
+// updated client to db
+function updateClientDB() {
+  const page = document.querySelector('.page__body');
+
+  const btnsUpdate = document.querySelectorAll('.tbody__btn--update');
+  const popupUpdate = document.querySelector('.popup-update');
+  const updateSubtitle = popupUpdate.querySelector('.update__subtitle');
+  const updateSurname = popupUpdate.querySelector('.update__input--surname');
+  const updateName = popupUpdate.querySelector('.update__input--name');
+  const updateMiddlename = popupUpdate.querySelector('.update__input--middlename');
+
+
+  // const popupDelete = document.querySelector('.popup-delete');
+  // const popupWrapContainer = document.querySelector('.update__wrap');
 
   btnsUpdate.forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.preventDefault();
+    btn.addEventListener('click', async () => {
       const clientUpdate = btn.parentElement.parentElement;
+      const clientUpdateId = clientUpdate.querySelector('.tbody__title--id').innerHTML;
 
-      for(let i = 0; i < clientUpdate.children.length; i++) {
-        if(clientUpdate.children[i].classList.contains('tbody__title--id')) {
-          clientId = clientUpdate.children[i].innerHTML;
-        }
-      }
+      const client = (await loadClient(clientUpdateId)).shift();
 
-      const client = (await loadClient(clientId))[0];
-
-      popupWrapContainer.innerHTML = `<h2 class="update__title">Изменить данные</h2>
-        <p class="update__subtitle">ID: ${client.id}</p>
-        <form class="update__form">
-          <label class="update__label update__label--req">Фамилия</label>
-          <input type="text" class="update__input" value="${client.surname}">
-          <label class="update__label update__label--req">Имя</label>
-          <input type="text" class="update__input" value="${client.name}">
-          <label class="update__label">Отчество</label>
-          <input type="text" class="update__input" value="${client.middlename}">
-          <button class="update__add">
-            <svg class="update__icon-add" width="16" height="16">
-              <use xlink:href="img/sprite.svg#add_circle"></use>
-            </svg>
-            Добавить контакт
-          </button>
-          <button class="update__save">Сохранить</button>
-          <button class="update__delete">Удалить клиента</button>
-        </form>
-        <button class="update__close">
-          <svg class="update__icon" width="29" height="29">
-            <use xlink:href="img/sprite.svg#close"></use>
-          </svg>
-        </button>`;
+      updateSubtitle.innerHTML = client.id;
+      updateSurname.value = client.surname;
+      updateName.value = client.name;
+      updateMiddlename.value = client.middlename;
 
       page.classList.add('is-popup');
       popupUpdate.classList.add('is-active');
@@ -372,75 +613,24 @@ function actionsClients() {
       popupUpdateDelete.addEventListener('click', e => {
         popupUpdate.classList.remove('is-active');
         popupDelete.classList.add('is-active');
-
-        const popupDeleteClose = popupDelete.querySelector('.delete__close');
-        const popupDeleteCancel = popupDelete.querySelector('.delete__cancel');
-        const popupDeleteDelete = popupDelete.querySelector('.delete__delete');
-
-        popupDeleteClose.addEventListener('click', e => {
-          e.preventDefault();
-          page.classList.remove('is-popup');
-          popupDelete.classList.remove('is-active');
-        });
-
-        popupDeleteCancel.addEventListener('click', e => {
-          e.preventDefault();
-          page.classList.remove('is-popup');
-          popupDelete.classList.remove('is-active');
-        });
-
-        popupDelete.addEventListener('click', e => {
-          e.preventDefault();
-          if(e.target.classList.contains('popup-delete')) {
-            page.classList.remove('is-popup');
-            popupDelete.classList.remove('is-active');
-          }
-        });
-
-        popupDeleteDelete.addEventListener('click', async e => {
-          e.preventDefault();
-          await deletedClient(clientId);
-          await createClients();
-          page.classList.remove('is-popup');
-          popupDelete.classList.remove('is-active');
-        });
       });
     })
   });
-}
-
-async function createClients() {
-  const strSearch = searchInput.value;
-  const clients = await loadClientsSearch(strSearch);
-
-  sortedClients(clients);
-
-  titleTableId.onclick = function (){
-    clickTitleTable(titleTableId, clients);
-  };
-
-  titleTableName.onclick = function (){
-    clickTitleTable(titleTableName, clients, 'surname', 'name', 'middlename');
-  };
-
-  titleTableCreated.onclick = function (){
-    clickTitleTable(titleTableCreated, clients, 'created');
-  };
-
-  titleTableUpdated.onclick = function (){
-    clickTitleTable(titleTableUpdated, clients, 'updated');
-  };
-
-  addTooltipContacs();
-  actionsClients();
 };
 
-createClients();
-
+// search clients in db
 searchInput.addEventListener('input', e => {
   e.preventDefault();
   let timerId = setTimeout(function() {
-    createClients();
+    loadPageClients();
     clearTimeout(timerId);
   }, 300);
 })
+
+// main function page
+function loadPageClients() {
+  createClients();
+  addClientDB();
+};
+
+loadPageClients();

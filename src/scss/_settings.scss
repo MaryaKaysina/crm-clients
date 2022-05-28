@@ -9,7 +9,6 @@ html {
 }
 
 .page {
-  height: 100%;
   font-family: var(--font-family, sans-serif);
   -webkit-text-size-adjust: 100%;
 }
@@ -17,8 +16,12 @@ html {
 .page__body {
   margin: 0;
   min-width: 320px;
-  min-height: 100%;
+  height: fit-content;
   font-size: 16px;
+}
+
+.page__body.is-popup {
+  overflow: hidden;
 }
 
 img {
@@ -117,4 +120,7 @@ a {
 
 .page--ios .dis-scroll {
   position: relative;
+}
+:focus-visible {
+  outline: #9873FF auto 1px;
 }

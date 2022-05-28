@@ -1,19 +1,28 @@
 .update,
 .delete,
 .new {
-  position: absolute;
-  top: 0;
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
+  height: 100vh;
   background: rgb(0 0 0 / .6);
   opacity: 0;
   visibility: hidden;
   transition: opacity .3s ease-in-out, visibility .3s ease-in-out;
+  overflow: auto;
   &.is-active {
     opacity: 1;
     visibility: visible;
+    & .new__wrap {
+      top: auto;
+      opacity: 1;
+      bottom: -50%;
+      &.is-height {
+        top: 67%;
+      }
+    }
   }
   &__wrap {
     position: relative;
@@ -43,7 +52,7 @@
     line-height: 16px;
     color: #B0B0B0;
   }
-  &__label {
+  &__label-upd {
     display: block;
     font-size: 10px;
     line-height: 14px;
@@ -62,6 +71,7 @@
     width: 100%;
     border: none;
     border-bottom: 1px solid rgb(200 197 209 / .5);
+    background: transparent;
     font-weight: 600;
     font-size: 14px;
     line-height: 19px;
@@ -73,14 +83,21 @@
   &__input:last-of-type {
     margin-bottom: 25px;
   }
+  &__input[data-label="label"][value] + .new__label {
+    display: flex;
+  }
+  &__input[data-label="label"]:not([value=""]) + .new__label,
+  &__input[data-label="label"]:focus + .new__label,
+  &__input[data-label="label"]:active + .new__label {
+    display: none;
+  }
   &__add {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     margin-bottom: 25px;
     margin-left: -30px;
-    padding: 8px 0;
+    padding: 15px 0;
     width: calc(100% + 60px);
     background: rgb(200 197 209 / .3);
   }
@@ -94,10 +111,29 @@
     line-height: 19px;
     color: #333333;
   }
+  &__contact.is-disable {
+    opacity: .5;
+    cursor: auto;
+  }
   &__icon-add {
     align-self: end;
     margin-right: 3px;
     fill: #9873FF;
+  }
+  &__error {
+    display: none;
+    margin: 9px auto;
+    margin-top: -16px;
+    width: fit-content;
+    max-width: 255px;
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 14px;
+    color: #F06A4D;
+    text-align: center;
+    &.invalid {
+      display: block;
+    }
   }
   &__close {
     @include btn-reset;
@@ -113,6 +149,91 @@
   &__icon {
     position: relative;
     display: block;
+    fill: #B0B0B0;
+    transition: fill .3s ease-in-out;
+  }
+  &__row {
+    position: relative;
+  }
+  &__label {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    font-size: 14px;
+    line-height: 19px;
+    display: flex;
+    align-items: center;
+    color: #B0B0B0;
+    &--req {
+      &::after {
+        content: "*";
+        position: absolute;
+        right: -9px;
+        color: #9873FF;
+      }
+    }
+  }
+  &__row-contact {
+    position: relative;
+    display: flex;
+    margin-bottom: 15px;
+    padding: 0 30px;
+    width: 100%;
+  }
+  &__row-contact.is-hide {
+    display: none;
+  }
+  &__value {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    width: 240px;
+    border: 1px solid #C8C5D1;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 19px;
+    color: #333333;
+    &::placeholder {
+      font-weight: 400;
+      color: #B0B0B0;
+    }
+  }
+  &__delete-contact {
+    @include btn-reset;
+    position: absolute;
+    right: 30px;
+    height: 100%;
+    margin-left: -1px;
+    padding: 1px 6px;
+    border: 1px solid #C8C5D1;
+    background: #E7E5EB;
+    transition: border .3s ease-in-out;
+  }
+  &__cancel {
+    @include btn-reset;
+    position: relative;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: #333333;
+    &::after {
+      @include pseudo();
+      width: 100%;
+      height: 0.2px;
+      bottom: 1px;
+      background: #333333;
+    }
+  }
+  @include for-desktop {
+    &__delete-contact:hover {
+      border: 1px solid #F06A4D;
+      & .new__icon {
+        fill: #F06A4D;
+      }
+    }
   }
 }
 
@@ -124,13 +245,6 @@
 }
 
 .delete.is-active .delete {
-  &__wrap {
-    top: 50%;
-    opacity: 1;
-  }
-}
-
-.new.is-active .new {
   &__wrap {
     top: 50%;
     opacity: 1;
@@ -154,27 +268,6 @@
   color: #FFFFFF;
 }
 
-.update__delete,
-.delete__cancel,
-.new__cancel {
-  @include btn-reset;
-  position: relative;
-  display: block;
-  margin-right: auto;
-  margin-left: auto;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 16px;
-  color: #333333;
-  &::after {
-    @include pseudo();
-    width: 100%;
-    height: 1px;
-    bottom: 1px;
-    background: #333333;
-  }
-}
-
 .delete {
   &__wrap {
     display: flex;
@@ -195,79 +288,6 @@
   }
 }
 
-.new {
-  &__row {
-    position: relative;
-  }
-  &__input {
-    background: transparent;
-  }
-  &__label {
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    font-size: 14px;
-    line-height: 19px;
-    display: flex;
-    align-items: center;
-    color: #B0B0B0;
-    &--req {
-      &::after {
-        content: "*";
-        position: absolute;
-        right: -9px;
-        color: #9873FF;
-      }
-    }
-  }
-  &__input:valid + .new__label,
-  &__input:focus + .new__label,
-  &__input:active + .new__label {
-    display: none;
-  }
-  &__add {
-    padding: 25px 0;
-  }
-  &__row-contact {
-    position: relative;
-    display: flex;
-    margin-bottom: 25px;
-    padding: 0 30px;
-    width: 100%;
-  }
-  &__row-contact.is-hide {
-    display: none;
-  }
-  &__value {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    width: 68%;
-    border: 1px solid #C8C5D1;
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 19px;
-    color: #333333;
-    &::placeholder {
-      font-weight: 400;
-      color: #B0B0B0;
-    }
-  }
-  &__delete {
-    position: absolute;
-    right: 30px;
-    height: 100%;
-    border: 1px solid #C8C5D1;
-    background: #E7E5EB;
-  }
-  &__icon {
-    fill: #B0B0B0;
-  }
-  &__contact.is-disable {
-    opacity: .5;
-    cursor: auto;
-  }
-}
 .choices {
   margin: 0;
   width: 32%;

@@ -1,21 +1,21 @@
-<div class="popup-new new">
+<div class="popup-new new popup">
   <div class="new__wrap">
     <h2 class="new__title">Новый клиент</h2>
     <form class="new__form">
       <div class="new__row">
-        <input type="text" class="new__input new__input--surname" required>
+        <input type="text" class="new__input new__input--surname" required data-label="label" value="">
         <label class="new__label new__label--req">Фамилия</label>
       </div>
       <div class="new__row">
-        <input type="text" class="new__input new__input--name" required>
+        <input type="text" class="new__input new__input--name" required data-label="label" value="">
         <label class="new__label new__label--req">Имя</label>
       </div>
       <div class="new__row">
-        <input type="text" class="new__input new__input--middlename" required>
+        <input type="text" class="new__input new__input--middlename" data-label="label" value="">
         <label class="new__label">Отчество</label>
       </div>
       <div class="new__add">
-        <div class="new__row-contact">
+        <div class="new__row-contact is-hide">
           <select name="type-contact" class="new__type-contact choices">
             <option value="Phone">Телефон</option>
             <option value="Email">Email</option>
@@ -24,7 +24,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -39,7 +39,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -54,7 +54,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -69,7 +69,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -84,7 +84,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -99,7 +99,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -114,7 +114,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -129,7 +129,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -144,7 +144,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -159,7 +159,7 @@
             <option value="Other">Другое</option>
           </select>
           <input type="text" class="new__value" placeholder="Введите данные контакта">
-          <button class="new__delete">
+          <button class="new__delete-contact">
             <svg class="new__icon" width="12" height="12">
               <use xlink:href="img/sprite.svg#delete-contact"></use>
             </svg>
@@ -172,7 +172,10 @@
           Добавить контакт
         </button>
       </div>
-      <button class="new__save">Сохранить</button>
+      <span class="new__error"></span>
+      <button class="new__save">
+        Сохранить
+      </button>
       <button class="new__cancel">Отмена</button>
     </form>
     <button class="new__close">

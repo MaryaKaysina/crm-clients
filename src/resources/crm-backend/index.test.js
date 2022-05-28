@@ -39,7 +39,7 @@ beforeEach(() => {
 const client = {
   name: 'Name',
   surname: 'Surname',
-  lastName: 'Last name',
+  middlename: 'Last name',
   contacts: [
     {
       type: 'Phone',
@@ -51,7 +51,7 @@ const searchValue = 'abcdefGHijKLmnOPqrstuvwxyz';
 const searchQuery = 'ghIJklmnopqr';
 
 function autoData(from) {
-  return ['id', 'createdAt', 'updatedAt']
+  return ['id', 'created', 'updated']
     .reduce((obj, prop) => ({ ...obj, [prop]: from[prop] }), {});
 }
 
@@ -106,7 +106,7 @@ describe('Clients API', () => {
     expect(res.data[0][field]).toEqual(searchValue);
   }
 
-  for (const field of ['name', 'surname', 'lastName']) {
+  for (const field of ['name', 'surname', 'middlename']) {
     it(
       `GET /api/clients should search by ${field} substring`,
       () => checkSearch(field, searchValue, searchQuery)
@@ -148,15 +148,15 @@ describe('Clients API', () => {
     const res1 = await axios.patch(original.id, { name, surname });
     expect(res1.status).toBe(200);
     expect(res1.data).toEqual({ ...client, ...autoData(res1.data), name, surname });
-    expect(res1.data.createdAt === original.createdAt).toBe(true);
-    expect(res1.data.updatedAt > original.updatedAt).toBe(true);
+    expect(res1.data.created === original.created).toBe(true);
+    expect(res1.data.updated > original.updated).toBe(true);
 
     await waitASecond();
     const res2 = await axios.patch(original.id, { contacts });
     expect(res2.status).toBe(200);
     expect(res2.data).toEqual({ ...client, ...autoData(res2.data), name, surname, contacts });
-    expect(res2.data.createdAt === original.createdAt).toBe(true);
-    expect(res2.data.updatedAt > res1.data.updatedAt).toBe(true);
+    expect(res2.data.created === original.created).toBe(true);
+    expect(res2.data.updated > res1.data.updated).toBe(true);
   });
 
   it('PATCH /api/clients/{id} should return error descriptions with 422 status on validation error', async () => {
