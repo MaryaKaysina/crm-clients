@@ -7,14 +7,111 @@ const titleTableUpdated = document.querySelector('.thead__title--updated');
 
 // secondary functions
 function checkHeight() {
-  const popup = document.querySelector('.popup.is-active .new__wrap');
+  const popup = document.querySelector('.popup.is-active .new__wrap') || document.querySelector('.popup.is-active .update__wrap');
   const heightPopup = popup.offsetHeight;
   const heightYiewport = window.innerHeight;
 
   if(heightPopup >= heightYiewport - 20) {
     popup.classList.add('is-height');
+  } else {
+    if(popup.classList.contains('is-height')) {
+      popup.classList.remove('is-height');
+    }
   }
 };
+
+const capitalize = s => s && s[0].toUpperCase() + s.slice(1).toLowerCase();
+
+function validFormCheck(popup, surname, name) {
+  const contactList = [];
+  let valid = false;
+  let error = '';
+
+  if(surname.length > 0) {
+    const reg = /^[а-яёА-ЯЁ]+$/u;
+    if(surname.match(reg)) {
+      if(name.length > 0) {
+        if(name.match(reg)) {
+          valid = true;
+
+          let contacts;
+          if(popup.querySelectorAll('.new__row-contact').length === 0) {
+            contacts = popup.querySelectorAll('.update__row-contact.is-view');
+          } else {
+            contacts = popup.querySelectorAll('.new__row-contact.is-view');
+          }
+
+          if(contacts.length > 0) {
+            contacts.forEach(el => {
+              if(!el.classList.contains('is-hide')) {
+                const typeContact = el.querySelector('.is-selected').dataset.value;
+                const contactItem = el.querySelector('.new__value') || el.querySelector('.update__value');
+                const contact = contactItem.value.trim();
+
+                if(typeContact === 'Phone') {
+                  const reg = /^\+?[78][-\(]?\d{3}\)?-?\d{3}-?\d{2}-?\d{2}$/;
+                  if(contact.match(reg)) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: неверный формат телефона!';
+                  }
+                }
+                if(typeContact === 'Email') {
+                  const reg = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+                  if(contact.match(reg)) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: неверный формат e-mail!';
+                  }
+                }
+                if(typeContact === 'VK') {
+                  const reg = /^(https?:\/\/)?(www\.)?vk\.com\/(\w|\d)+?\/?$/;
+                  if(contact.match(reg)) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: неверный формат ссылки на ВК!';
+                  }
+                }
+                if(typeContact === 'FB') {
+                  const reg = /^(https?:\/\/)?(www\.)?(facebook\.|fb\.)com\/(\w|\d)+?\/?$/;
+                  if(contact.match(reg)) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: неверный формат ссылки на Фэйсбук!';
+                  }
+                }
+                if(typeContact === 'Other') {
+                  if(contact.length > 0) {
+                    valid = true;
+                  } else {
+                    valid = false;
+                    error = 'Ошибка: контакт не должен быть пустым!';
+                  }
+                }
+
+                contactList.push({"type": typeContact, "value": contact});
+              }
+            })
+          }
+        } else {
+          error = 'Ошибка: имя должно содержать только кирилицу!';
+        }
+      } else {
+        error = 'Ошибка: введите имя!';
+      }
+    } else {
+      error = 'Ошибка: фамилия должна содержать только кирилицу!';
+    }
+  } else {
+    error = 'Ошибка: введите фамилию!';
+  }
+
+  return {valid, error, contactList};
+}
 
 // function api server
 async function loadClientsSearch(search = '') {
@@ -52,6 +149,15 @@ async function deletedClient(id) {
     method: 'DELETE',
   });
 };
+
+async function updatedClient(id, client) {
+  const response = await fetch(`http://localhost:5500/api/clients/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(client)
+  });
+  const data = await response.json();
+}
 
 // function handler contacts clients from server
 function checkLoadPhone(value, isHide = false, index, indexContact, type = 'Телефон') {
@@ -295,7 +401,14 @@ async function createClients() {
   const strSearch = searchInput.value;
   const clients = await loadClientsSearch(strSearch);
 
-  sortedClients(clients);
+  const clientHashId = window.location.hash.slice(window.location.hash.indexOf('=') + 1);
+
+  if(clientHashId.length === 0) {
+    sortedClients(clients);
+  } else {
+    sortedClients(clients);
+    updateClientDB('', clientHashId);
+  }
 
   titleTableId.onclick = function (){
     clickTitleTable(titleTableId, clients);
@@ -313,8 +426,8 @@ async function createClients() {
     clickTitleTable(titleTableUpdated, clients, 'updated');
   };
 
-  deletedClientDB();
-  updateClientDB();
+  deletedClientDBBtn();
+  updateClientDBBtn();
 };
 
 // added client to db
@@ -333,23 +446,26 @@ function addClientDB() {
   const newTypeContacts = document.querySelectorAll('.new__type-contact');
 
   function addContactField() {
+    checkHeight();
     const newContactHide = document.querySelectorAll('.new__row-contact.is-hide');
     if (newContactHide.length > 1) {
       newContactHide[0].classList.remove('is-hide');
+      newContactHide[0].classList.add('is-view');
 
       const btnContactDelete = newContactHide[0].querySelector('.new__delete-contact');
 
       btnContactDelete.addEventListener('click', () => {
+        checkHeight();
         btnContactDelete.parentElement.classList.add('is-hide');
+        btnContactDelete.parentElement.classList.remove('is-view');
         const input = btnContactDelete.parentElement.querySelector('.new__value');
         input.value = '';
       })
     } else if(newContactHide.length === 1) {
       newContactHide[0].classList.remove('is-hide');
+      newContactHide[0].classList.add('is-view');
       popupAddContact.classList.add('is-disable');
     }
-
-    checkHeight();
   };
 
   function closePopupClick() {
@@ -376,96 +492,19 @@ function addClientDB() {
     popupAddError.classList.remove('invalid');
   };
 
-  function validFormCheck(popup, surname, name) {
-    const contactList = [];
-    let valid = false;
-    let error = '';
-
-    if(surname.length > 0) {
-      const reg = /^[а-яёА-ЯЁ]+$/u;
-      if(surname.match(reg)) {
-        if(name.length > 0) {
-          if(name.match(reg)) {
-            valid = true;
-
-            const contacts = popup.querySelectorAll('.new__row-contact');
-            contacts.forEach(el => {
-              if(!el.classList.contains('is-hide')) {
-                const typeContact = el.querySelector('.is-selected').dataset.value;
-                const contact = el.querySelector('.new__value').value.trim();
-
-                if(typeContact === 'Phone') {
-                  const reg = /^\+?[78][-\(]?\d{3}\)?-?\d{3}-?\d{2}-?\d{2}$/;
-                  if(contact.match(reg)) {
-                    valid = true;
-                  } else {
-                    valid = false;
-                    error = 'Ошибка: неверный формат телефона!';
-                  }
-                }
-                if(typeContact === 'Email') {
-                  const reg = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
-                  if(contact.match(reg)) {
-                    valid = true;
-                  } else {
-                    valid = false;
-                    error = 'Ошибка: неверный формат e-mail!';
-                  }
-                }
-                if(typeContact === 'VK') {
-                  const reg = /^(https?:\/\/)?(www\.)?vk\.com\/(\w|\d)+?\/?$/;
-                  if(contact.match(reg)) {
-                    valid = true;
-                  } else {
-                    valid = false;
-                    error = 'Ошибка: неверный формат ссылки на ВК!';
-                  }
-                }
-                if(typeContact === 'FB') {
-                  const reg = /^(https?:\/\/)?(www\.)?(facebook\.|fb\.)com\/(\w|\d)+?\/?$/;
-                  if(contact.match(reg)) {
-                    valid = true;
-                  } else {
-                    valid = false;
-                    error = 'Ошибка: неверный формат ссылки на Фэйсбук!';
-                  }
-                }
-                if(typeContact === 'Other') {
-                  if(contact.length > 0) {
-                    valid = true;
-                  } else {
-                    valid = false;
-                    error = 'Ошибка: контакт не должен быть пустым!';
-                  }
-                }
-
-                contactList.push({"type": typeContact, "value": contact});
-              }
-            })
-          } else {
-            error = 'Ошибка: имя должно содержать только кирилицу!';
-          }
-        } else {
-          error = 'Ошибка: введите имя!';
-        }
-      } else {
-        error = 'Ошибка: фамилия должна содержать только кирилицу!';
-      }
-    } else {
-      error = 'Ошибка: введите фамилию!';
-    }
-
-    return {valid, error, contactList};
-  }
-
   async function saveClient() {
     const validSurName = popupNew.querySelector('.new__input--surname').value.trim();
     const validName = popupNew.querySelector('.new__input--name').value.trim();
     const validMiddleName = popupNew.querySelector('.new__input--middlename').value.trim();
-    const validForm = validFormCheck(popupNew, validSurName, validName);
+
+    const newSurName = capitalize(validSurName);
+    const newName = capitalize(validName);
+    const newMiddleName = capitalize(validMiddleName);
+
+    const validForm = validFormCheck(popupNew, newSurName, newName);
 
     if(validForm.valid) {
-      await addNewClient(validSurName, validName, validMiddleName, validForm.contactList);
+      await addNewClient(newSurName, newName, newMiddleName, validForm.contactList);
       closePopupClick();
       createClients();
     } else {
@@ -512,108 +551,326 @@ function addClientDB() {
 };
 
 // deleted client to db
-function deletedClientDB() {
+function deletedClientDB(btn) {
   const page = document.querySelector('.page__body');
-
-  const btnDelete = document.querySelectorAll('.tbody__btn--delete');
   const popupDelete = document.querySelector('.popup-delete');
+  const clientDelete = btn.parentElement.parentElement;
+  const clientId = clientDelete.querySelector('.tbody__title--id').innerHTML;
+  const popupDeleteClose = popupDelete.querySelector('.delete__close');
+  const popupDeleteCancel = popupDelete.querySelector('.delete__cancel');
+  const popupDeleteDelete = popupDelete.querySelector('.delete__delete');
+
+  async function deletedClientId() {
+    await deletedClient(clientId);
+    createClients();
+    page.classList.remove('is-popup');
+    popupDelete.classList.remove('is-active');
+  }
+
+  page.classList.add('is-popup');
+  popupDelete.classList.add('is-active');
+
+  popupDeleteClose.addEventListener('click', e => {
+    e.preventDefault();
+    page.classList.remove('is-popup');
+    popupDelete.classList.remove('is-active');
+  });
+
+  popupDeleteCancel.addEventListener('click', e => {
+    e.preventDefault();
+    page.classList.remove('is-popup');
+    popupDelete.classList.remove('is-active');
+  });
+
+  popupDelete.addEventListener('click', e => {
+    e.preventDefault();
+    if(e.target.classList.contains('popup-delete')) {
+      page.classList.remove('is-popup');
+      popupDelete.classList.remove('is-active');
+    }
+  });
+
+  popupDeleteDelete.addEventListener('click', deletedClientId);
+};
+
+function deletedClientDBBtn() {
+  const btnDelete = document.querySelectorAll('.tbody__btn--delete');
 
   btnDelete.forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
 
-      const clientDelete = btn.parentElement.parentElement;
-      const clientId = clientDelete.querySelector('.tbody__title--id').innerHTML;
-      const popupDeleteClose = popupDelete.querySelector('.delete__close');
-      const popupDeleteCancel = popupDelete.querySelector('.delete__cancel');
-      const popupDeleteDelete = popupDelete.querySelector('.delete__delete');
-
-      async function deletedClientId() {
-        await deletedClient(clientId);
-        createClients();
-        page.classList.remove('is-popup');
-        popupDelete.classList.remove('is-active');
-      }
-
-      page.classList.add('is-popup');
-      popupDelete.classList.add('is-active');
-
-      popupDeleteClose.addEventListener('click', e => {
-        e.preventDefault();
-        page.classList.remove('is-popup');
-        popupDelete.classList.remove('is-active');
-      });
-
-      popupDeleteCancel.addEventListener('click', e => {
-        e.preventDefault();
-        page.classList.remove('is-popup');
-        popupDelete.classList.remove('is-active');
-      });
-
-      popupDelete.addEventListener('click', e => {
-        e.preventDefault();
-        if(e.target.classList.contains('popup-delete')) {
-          page.classList.remove('is-popup');
-          popupDelete.classList.remove('is-active');
-        }
-      });
-
-      popupDeleteDelete.addEventListener('click', deletedClientId);
+      deletedClientDB(btn);
     });
   })
-}
+};
 
 // updated client to db
-function updateClientDB() {
+async function updateClientDB(btn = '', clientId) {
   const page = document.querySelector('.page__body');
 
-  const btnsUpdate = document.querySelectorAll('.tbody__btn--update');
   const popupUpdate = document.querySelector('.popup-update');
   const updateSubtitle = popupUpdate.querySelector('.update__subtitle');
   const updateSurname = popupUpdate.querySelector('.update__input--surname');
   const updateName = popupUpdate.querySelector('.update__input--name');
   const updateMiddlename = popupUpdate.querySelector('.update__input--middlename');
 
+  const popupAddContact = popupUpdate.querySelector('.update__contact');
+  const newTypeContacts = document.querySelectorAll('.update__type-contact');
+  const popupAddSave = popupUpdate.querySelector('.update__save');
+  const popupAddInputs = popupUpdate.querySelectorAll('.update__input');
 
-  // const popupDelete = document.querySelector('.popup-delete');
-  // const popupWrapContainer = document.querySelector('.update__wrap');
+  let client = '';
 
+  if (clientId.length === 0) {
+    const clientUpdate = btn.parentElement.parentElement;
+    const clientUpdateId = clientUpdate.querySelector('.tbody__title--id').innerHTML;
+
+    client = (await loadClient(clientUpdateId)).shift();
+    window.location.hash = `?editClientId=${client.id}`;
+  } else {
+    client = (await loadClient(clientId)).shift();
+  }
+
+  updateSubtitle.innerHTML = `ID: ${client.id}`;
+  updateSurname.value = client.surname;
+  updateName.value = client.name;
+  updateMiddlename.value = client.middlename;
+
+  let selectChoices = [];
+
+  if(client.contacts.length > 0) {
+    client.contacts.forEach(contact => {
+      const contactType = popupUpdate.querySelectorAll('.update__row-contact');
+
+      contactType.forEach(el => {
+        el.classList.add('is-hide');
+      });
+
+      const contactTypeSelect = contactType[0].querySelector('.update__type-contact.choices');
+      const contactTypeInput = contactType[0].querySelector('.update__value');
+
+      contactTypeSelect.innerHTML = '';
+
+      if(contact.type === 'Phone') {
+        contactType[0].classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone" selected>Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other">Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+      if(contact.type === 'Email') {
+        contactType[0].classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
+        <option value="Email" selected>Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other">Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+      if(contact.type === 'VK') {
+        contactType[0].classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK" selected>Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other">Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+      if(contact.type === 'FB') {
+        contactType[0].classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB" selected>Facebook</option>
+        <option value="Other">Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+      if(contact.type === 'Other') {
+        contactType[0].classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other" selected>Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+    })
+
+    const contactTypeSelectHide = popupUpdate.querySelectorAll('.update__row-contact.is-hide .update__type-contact.choices');
+
+    // selectChoices.forEach(el => {
+    //   console.log(el);
+    //   // el.destroy();
+    // });
+
+    contactTypeSelectHide.forEach(newTypeContact => {
+      selectChoices.push(new Choices(newTypeContact, {
+        searchEnabled: false,
+        itemSelectText: '',
+        shouldSort: false
+      }));
+    });
+
+    // selectChoices.forEach(el => {
+    //   el.init();
+    // });
+  }
+
+  function addContactField() {
+    checkHeight();
+    const newContactHide = document.querySelectorAll('.update__row-contact.is-hide');
+    if (newContactHide.length > 1) {
+      newContactHide[0].classList.remove('is-hide');
+      newContactHide[0].classList.add('is-view');
+
+      const btnContactDelete = newContactHide[0].querySelector('.update__delete-contact');
+
+      btnContactDelete.addEventListener('click', () => {
+        checkHeight();
+        btnContactDelete.parentElement.classList.add('is-hide');
+        btnContactDelete.parentElement.classList.remove('is-view');
+        const input = btnContactDelete.parentElement.querySelector('.update__value');
+        input.value = '';
+      })
+    } else if(newContactHide.length === 1) {
+      newContactHide[0].classList.remove('is-hide');
+      newContactHide[0].classList.add('is-view');
+      popupAddContact.classList.add('is-disable');
+    }
+  };
+
+  popupAddContact.addEventListener('click', addContactField);
+
+  page.classList.add('is-popup');
+  popupUpdate.classList.add('is-active');
+
+  checkHeight();
+
+  const popupUpdateClose = popupUpdate.querySelector('.update__close');
+  const popupUpdateDelete = popupUpdate.querySelector('.update__delete');
+  const popupDelete = document.querySelector('.popup-delete');
+  const popupAddError = popupUpdate.querySelector('.update__error');
+
+  popupUpdateClose.addEventListener('click', e => {
+    e.preventDefault();
+    popupUpdate.classList.remove('is-active');
+    page.classList.remove('is-popup');
+    window.location.hash = '';
+    closePopupClick();
+  });
+
+  popupUpdate.addEventListener('click', e => {
+    e.preventDefault();
+    if(e.target.classList.contains('popup-update')) {
+      page.classList.remove('is-popup');
+      popupUpdate.classList.remove('is-active');
+      window.location.hash = '';
+      closePopupClick();
+    }
+  });
+
+  popupUpdateDelete.addEventListener('click', e => {
+    popupUpdate.classList.remove('is-active');
+    popupDelete.classList.add('is-active');
+    window.location.hash = '';
+    deletedClientDB(btn);
+    closePopupClick();
+  });
+
+  function closePopupClick() {
+    popupAddInputs.forEach(input => {
+      if(input.getAttribute('value').length > 0) {
+        input.setAttribute('value','');
+        input.value = '';
+      }
+    })
+    page.classList.remove('is-popup');
+    popupUpdate.classList.remove('is-active');
+    const newContact = document.querySelectorAll('.update__row-contact');
+
+    newContact.forEach(el => {
+      if(!el.classList.contains('is-hide')) {
+        const newContactInput = el.querySelector('.update__value');
+        el.classList.add('is-hide');
+        el.classList.remove('is-view');
+        newContactInput.value = '';
+      }
+    });
+    popupAddContact.removeEventListener('click', addContactField);
+    popupAddContact.classList.remove('is-disable');
+    popupAddError.classList.remove('invalid');
+  };
+
+  async function saveClient() {
+    const validSurName = popupUpdate.querySelector('.update__input--surname').value.trim();
+    const validName = popupUpdate.querySelector('.update__input--name').value.trim();
+    const validMiddleName = popupUpdate.querySelector('.update__input--middlename').value.trim();
+
+    const newSurName = capitalize(validSurName);
+    const newName = capitalize(validName);
+    const newMiddleName = capitalize(validMiddleName);
+
+    const validForm = validFormCheck(popupUpdate, newSurName, newName);
+
+    if(validForm.valid) {
+      const clientUpdate = {
+        "name": newName,
+        "surname": newSurName,
+        "middlename": newMiddleName,
+        "contacts": validForm.contactList
+      };
+
+      await updatedClient(client.id, clientUpdate);
+      window.location.hash = ``;
+      closePopupClick();
+      createClients();
+    } else {
+      popupAddError.innerHTML = validForm.error;
+      popupAddError.classList.add('invalid');
+    }
+  };
+
+  popupAddSave.addEventListener('click', saveClient);
+};
+
+function updateClientDBBtn() {
+  const btnsUpdate = document.querySelectorAll('.tbody__btn--update');
   btnsUpdate.forEach(btn => {
     btn.addEventListener('click', async () => {
-      const clientUpdate = btn.parentElement.parentElement;
-      const clientUpdateId = clientUpdate.querySelector('.tbody__title--id').innerHTML;
-
-      const client = (await loadClient(clientUpdateId)).shift();
-
-      updateSubtitle.innerHTML = client.id;
-      updateSurname.value = client.surname;
-      updateName.value = client.name;
-      updateMiddlename.value = client.middlename;
-
-      page.classList.add('is-popup');
-      popupUpdate.classList.add('is-active');
-
-      const popupUpdateClose = popupUpdate.querySelector('.update__close');
-      const popupUpdateDelete = popupUpdate.querySelector('.update__delete');
-
-      popupUpdateClose.addEventListener('click', e => {
-        e.preventDefault();
-        popupUpdate.classList.remove('is-active');
-        page.classList.remove('is-popup');
-      });
-
-      popupUpdate.addEventListener('click', e => {
-        e.preventDefault();
-        if(e.target.classList.contains('popup-update')) {
-          page.classList.remove('is-popup');
-          popupUpdate.classList.remove('is-active');
-        }
-      });
-
-      popupUpdateDelete.addEventListener('click', e => {
-        popupUpdate.classList.remove('is-active');
-        popupDelete.classList.add('is-active');
-      });
+      updateClientDB(btn, '');
     })
   });
 };
@@ -625,7 +882,7 @@ searchInput.addEventListener('input', e => {
     loadPageClients();
     clearTimeout(timerId);
   }, 300);
-})
+});
 
 // main function page
 function loadPageClients() {

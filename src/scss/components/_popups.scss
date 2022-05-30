@@ -23,6 +23,14 @@
         top: 67%;
       }
     }
+    & .update__wrap {
+      top: auto;
+      opacity: 1;
+      bottom: -50%;
+      &.is-height {
+        top: 67%;
+      }
+    }
   }
   &__wrap {
     position: relative;
@@ -233,6 +241,9 @@
       & .new__icon {
         fill: #F06A4D;
       }
+      & .update__icon {
+        fill: #F06A4D;
+      }
     }
   }
 }
@@ -285,6 +296,30 @@
     line-height: 19px;
     color: #333333;
     text-align: center;
+  }
+}
+
+.update {
+  &__title {
+    margin-right: 4px;
+  }
+  &__delete {
+    @include btn-reset;
+    position: relative;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    color: #333333;
+    &::after {
+      @include pseudo();
+      width: 100%;
+      height: 0.2px;
+      bottom: 1px;
+      background: #333333;
+    }
   }
 }
 
