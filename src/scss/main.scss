@@ -19,8 +19,11 @@
 
 .main {
   padding-top: 30px;
-  min-height: 100vh;
+  min-height: calc(100vh - 91px);
   background: #F5F5F5;
+  &__tbody.is-load {
+    opacity: .5;
+  }
   &__title {
     @include p-reset;
     margin-bottom: 26px;
@@ -95,6 +98,7 @@
     }
   }
   @include mobile {
+    min-height: calc(100vh - 43px);
     &__title {
       margin-bottom: 20px;
       font-size: 18px;

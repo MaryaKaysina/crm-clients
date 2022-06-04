@@ -5,9 +5,6 @@ const titleTableName = document.querySelector('.thead__title--name');
 const titleTableCreated = document.querySelector('.thead__title--created');
 const titleTableUpdated = document.querySelector('.thead__title--updated');
 
-// const example = new Choices(document.getElementById('example'));
-// console.log(example.passedElement.element);
-
 
 // secondary functions
 function checkHeight() {
@@ -21,15 +18,19 @@ function checkHeight() {
     if(popup.classList.contains('is-height')) {
       popup.classList.remove('is-height');
     }
-  }
+  };
 };
 
-const capitalize = s => s && s[0].toUpperCase() + s.slice(1).toLowerCase();
+function capitalize(s) {
+  s = s && s[0].toUpperCase() + s.slice(1).toLowerCase();
+  return s;
+};
 
 function validFormCheck(popup, surname, name) {
   const contactList = [];
   let valid = false;
   let error = '';
+  let errorInput = '';
 
   if(surname.length > 0) {
     const reg = /^[а-яёА-ЯЁ]+$/u;
@@ -43,10 +44,12 @@ function validFormCheck(popup, surname, name) {
             contacts = popup.querySelectorAll('.update__row-contact.is-view');
           } else {
             contacts = popup.querySelectorAll('.new__row-contact.is-view');
-          }
+          };
 
           if(contacts.length > 0) {
-            contacts.forEach(el => {
+            errorInput = [];
+            error = [];
+            contacts.forEach((el, index) => {
               if(!el.classList.contains('is-hide')) {
                 const typeContact = el.querySelector('.is-selected').dataset.value;
                 const contactItem = el.querySelector('.new__value') || el.querySelector('.update__value');
@@ -58,64 +61,73 @@ function validFormCheck(popup, surname, name) {
                     valid = true;
                   } else {
                     valid = false;
-                    error = 'Ошибка: неверный формат телефона!';
-                  }
-                }
+                    error.push('Ошибка: неверный формат телефона!');
+                    errorInput.push(index);
+                  };
+                };
                 if(typeContact === 'Email') {
                   const reg = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
                   if(contact.match(reg)) {
                     valid = true;
                   } else {
                     valid = false;
-                    error = 'Ошибка: неверный формат e-mail!';
-                  }
-                }
+                    error.push('Ошибка: неверный формат e-mail!');
+                    errorInput.push(index);
+                  };
+                };
                 if(typeContact === 'VK') {
                   const reg = /^(https?:\/\/)?(www\.)?vk\.com\/(\w|\d)+?\/?$/;
                   if(contact.match(reg)) {
                     valid = true;
                   } else {
                     valid = false;
-                    error = 'Ошибка: неверный формат ссылки на ВК!';
-                  }
-                }
+                    error.push('Ошибка: неверный формат ссылки на ВК!');
+                    errorInput.push(index);
+                  };
+                };
                 if(typeContact === 'FB') {
                   const reg = /^(https?:\/\/)?(www\.)?(facebook\.|fb\.)com\/(\w|\d)+?\/?$/;
                   if(contact.match(reg)) {
                     valid = true;
                   } else {
                     valid = false;
-                    error = 'Ошибка: неверный формат ссылки на Фэйсбук!';
-                  }
-                }
+                    error.push('Ошибка: неверный формат ссылки на Фэйсбук!');
+                    errorInput.push(index);
+                  };
+                };
                 if(typeContact === 'Other') {
                   if(contact.length > 0) {
                     valid = true;
                   } else {
                     valid = false;
-                    error = 'Ошибка: контакт не должен быть пустым!';
-                  }
-                }
+                    error.push('Ошибка: контакт не должен быть пустым!');
+                    errorInput.push(index);
+                  };
+                };
 
                 contactList.push({"type": typeContact, "value": contact});
-              }
-            })
-          }
+              };
+            });
+          };
         } else {
           error = 'Ошибка: имя должно содержать только кирилицу!';
-        }
+          errorInput = 'name';
+        };
       } else {
         error = 'Ошибка: введите имя!';
-      }
+        errorInput = 'name';
+      };
     } else {
       error = 'Ошибка: фамилия должна содержать только кирилицу!';
-    }
+      errorInput = 'surname';
+    };
   } else {
     error = 'Ошибка: введите фамилию!';
-  }
+    errorInput = 'surname';
+  };
 
-  return {valid, error, contactList};
-}
+  return {valid, error, contactList, errorInput};
+};
 
 // function api server
 async function loadClientsSearch(search = '') {
@@ -161,7 +173,7 @@ async function updatedClient(id, client) {
     body: JSON.stringify(client)
   });
   const data = await response.json();
-}
+};
 
 // function handler contacts clients from server and add page
 function checkLoadPhone(value, isHide = false, index, indexContact, type = 'Телефон') {
@@ -240,7 +252,7 @@ function loadContacts(type, value, isHide, index, indexContact) {
   return contact;
 };
 
-function addContactField() {
+function addContactFieldNew() {
   const popupNew = document.querySelector('.popup-new.is-active');
   const popupAddContact = popupNew.querySelector('.new__contact');
   const popupAddClose = popupNew.querySelector('.new__close');
@@ -251,6 +263,7 @@ function addContactField() {
 
   function removeContactField() {
     popupAddContact.removeEventListener('click', clickBtnNewContact);
+    popupAddContact.classList.remove('is-disable');
 
     newContact.forEach(el => {
       if(el.classList.contains('is-view')) {
@@ -282,7 +295,6 @@ function addContactField() {
   function clickBtnNewContact() {
     checkHeight();
     const newContactHide = popupNew.querySelectorAll('.new__row-contact.is-hide');
-    console.log(newContactHide[0]);
     if (newContactHide.length > 1) {
       newContactHide[0].classList.remove('is-hide');
       newContactHide[0].classList.add('is-view');
@@ -330,6 +342,182 @@ function addContactField() {
   });
 };
 
+function addContactFieldUpdate(contacts) {
+  const popupNew = document.querySelector('.popup-update.is-active');
+  const popupAddContact = popupNew.querySelector('.update__contact');
+  const popupAddClose = popupNew.querySelector('.update__close');
+  const newContact = popupNew.querySelectorAll('.update__row-contact');
+
+  let selectChoices = [];
+
+  function removeContactField() {
+    popupAddContact.removeEventListener('click', clickBtnNewContact);
+    popupAddContact.classList.remove('is-disable');
+
+    newContact.forEach(el => {
+      if(el.classList.contains('is-view')) {
+        const newContactInput = el.querySelector('.update__value');
+        el.classList.add('is-hide');
+        el.classList.remove('is-view');
+        newContactInput.value = '';
+      }
+    });
+
+    selectChoices.forEach(el => {
+      const blockSelect = el.passedElement.element.parentElement.parentElement.parentElement;
+      blockSelect.innerHTML = `<select name="type-contact" class="update__type-contact choices">
+        <option value="Phone" selected>Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other">Другое</option>
+      </select>
+      <input type="text" class="update__value" placeholder="Введите данные контакта">
+      <button class="update__delete-contact">
+        <svg class="update__icon" width="12" height="12">
+          <use xlink:href="img/sprite.svg#delete-contact"></use>
+        </svg>
+      </button>`;
+    })
+  };
+
+  function clickBtnNewContact() {
+    checkHeight();
+    const newContactHide = popupNew.querySelectorAll('.update__row-contact.is-hide');
+
+    if (newContactHide.length > 1) {
+      newContactHide[0].classList.remove('is-hide');
+      newContactHide[0].classList.add('is-view');
+
+      const btnContactDelete = newContactHide[0].querySelector('.update__delete-contact');
+      btnContactDelete.addEventListener('click', () => {
+        checkHeight();
+        btnContactDelete.parentElement.classList.add('is-hide');
+        btnContactDelete.parentElement.classList.remove('is-view');
+        const input = btnContactDelete.parentElement.querySelector('.update__value');
+        input.value = '';
+      })
+
+    } else if(newContactHide.length === 1) {
+      newContactHide[0].classList.remove('is-hide');
+      newContactHide[0].classList.add('is-view');
+      popupAddContact.classList.add('is-disable');
+    }
+
+    const newTypeContactsNew = document.querySelectorAll('.popup.is-active .update__row-contact.is-view .update__type-contact');
+
+    if(newTypeContactsNew.length > 0) {
+      selectChoices = [];
+      newTypeContactsNew.forEach(element => {
+        selectChoices.push(new Choices(element, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      })
+    }
+  }
+
+  popupAddContact.addEventListener('click', clickBtnNewContact);
+
+  popupAddClose.addEventListener('click', removeContactField);
+
+  popupNew.addEventListener('click', e => {
+    e.preventDefault();
+    if(e.target.classList.contains('popup-update')) {
+      removeContactField();
+    }
+  });
+
+  if(contacts.length > 0) {
+    contacts.forEach(contact => {
+      const contactTypeNew = popupNew.querySelector('.update__row-contact.is-hide');
+      const contactTypeSelect = contactTypeNew.querySelector('.update__type-contact.choices');
+      const contactTypeInput = contactTypeNew.querySelector('.update__value');
+
+      contactTypeSelect.innerHTML = '';
+
+      if(contact.type === 'Phone') {
+        contactTypeNew.classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone" selected>Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other">Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+      if(contact.type === 'Email') {
+        contactTypeNew.classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
+        <option value="Email" selected>Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other">Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+      if(contact.type === 'VK') {
+        contactTypeNew.classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK" selected>Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other">Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+      if(contact.type === 'FB') {
+        contactTypeNew.classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB" selected>Facebook</option>
+        <option value="Other">Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+      if(contact.type === 'Other') {
+        contactTypeNew.classList.remove('is-hide');
+        contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
+        <option value="Email">Email</option>
+        <option value="VK">Vk</option>
+        <option value="FB">Facebook</option>
+        <option value="Other" selected>Другое</option>`;
+        contactTypeInput.value = contact.value;
+
+        selectChoices.push(new Choices(contactTypeSelect, {
+          searchEnabled: false,
+          itemSelectText: '',
+          shouldSort: false
+        }));
+      }
+
+      contactTypeNew.classList.add('is-view');
+    })
+  }
+};
+
 // added sort & tooltips in table
 function clickTitleTable(field, arr, sortedField1, sortedField2, sortedField3) {
   const asc = field.dataset.asc === 'true' ? false : true;
@@ -367,7 +555,6 @@ function createClientsElements(data) {
   const loadBlock = document.querySelector('.main__load');
 
   tableBlock.innerHTML = '';
-  tableBlock.style.height = '370px';
 
   if(data.length > 0) {
     data.forEach((item, index) => {
@@ -403,7 +590,7 @@ function createClientsElements(data) {
           </li>`;
 
         allContacts += moreContactsView;
-      }
+      };
 
       tr.innerHTML = `<td scope="row" class="tbody__title tbody__title--id">${item.id}</td>
           <td scope="row" class="tbody__title tbody__title--name">${name}</td>
@@ -421,7 +608,7 @@ function createClientsElements(data) {
 
       if(notFoundClient !== null) {
         notFoundClient.remove();
-      }
+      };
       tableBlock.append(tr);
     });
   } else {
@@ -431,8 +618,8 @@ function createClientsElements(data) {
 
     if(notFoundClient === null) {
       container.insertBefore(p, mainBtn)
-    }
-  }
+    };
+  };
 
   const contactMore = document.querySelectorAll('.list__link--more');
 
@@ -446,29 +633,13 @@ function createClientsElements(data) {
         item.classList.remove('is-hide');
       })
       el.parentElement.classList.add('is-hide');
-    })
-  })
+    });
+  });
 
   addTooltipContacs();
   loadBlock.classList.remove('is-active');
   mainBtn.classList.remove('main__btn--load');
-};
-
-function createTableHideLoad(data) {
-  const tableBlock = document.querySelector('.main__tbody');
-  const loadBlock = document.querySelector('.main__load');
-  const mainBtn = document.querySelector('.main__btn');
-
-  tableBlock.innerHTML = '';
-  tableBlock.style.height = '370px';
-
-  let timerId = setTimeout(function() {
-    loadBlock.classList.remove('is-active');
-    mainBtn.classList.remove('main__btn--load');
-    tableBlock.style.height = '';
-    createClientsElements(data);
-    clearTimeout(timerId);
-  }, 500);
+  tableBlock.style.height = '';
 };
 
 // created table clients
@@ -492,6 +663,12 @@ function sortedClients(clients, asc = true, field1 = 'id', field2 = '', field3 =
 
 // added table clients to page
 async function createClients() {
+  const loadPage = document.querySelector('.main__load');
+  const tableBody = document.querySelector('.main__tbody');
+
+  loadPage.classList.add('is-active');
+  tableBody.classList.add('is-load');
+
   const strSearch = searchInput.value;
   const clients = await loadClientsSearch(strSearch);
 
@@ -499,9 +676,11 @@ async function createClients() {
 
   if(clientHashId.length === 0) {
     sortedClients(clients);
+    updateClientDBBtn();
   } else {
     sortedClients(clients);
     updateClientDB('', clientHashId);
+    updateClientDBBtn();
   }
 
   titleTableId.onclick = function (){
@@ -521,7 +700,9 @@ async function createClients() {
   };
 
   deletedClientDBBtn();
-  updateClientDBBtn();
+
+  loadPage.classList.remove('is-active');
+  tableBody.classList.remove('is-load');
 };
 
 // added client to db
@@ -535,10 +716,19 @@ function addClientDB() {
   const popupAddCancel = popupNew.querySelector('.new__cancel');
   const popupAddSave = popupNew.querySelector('.new__save');
   const popupAddError = popupNew.querySelector('.new__error');
-  // const popupAddContact = popupNew.querySelector('.new__contact');
   const popupAddInputs = popupNew.querySelectorAll('.new__input');
 
   function closePopupClick() {
+    const validSurNameInput = popupNew.querySelector('.new__input--surname');
+    const validNameInput = popupNew.querySelector('.new__input--name');
+    const btnContacts = popupNew.querySelectorAll('.new__row-contact');
+
+    validSurNameInput.classList.remove('is-invalid');
+    validNameInput.classList.remove('is-invalid');
+    btnContacts.forEach((el) => {
+      el.classList.remove('is-invalid');
+    });
+
     popupAddInputs.forEach(input => {
       if(input.getAttribute('value').length > 0) {
         input.setAttribute('value','');
@@ -547,17 +737,27 @@ function addClientDB() {
     })
     page.classList.remove('is-popup');
     popupNew.classList.remove('is-active');
-
-    // popupAddContact.removeEventListener('click', addContactField);
-    // popupAddContact.classList.remove('is-disable');
     popupNewWrap.classList.remove('is-height');
     popupAddError.classList.remove('invalid');
   };
 
   async function saveClient() {
-    const validSurName = popupNew.querySelector('.new__input--surname').value.trim();
-    const validName = popupNew.querySelector('.new__input--name').value.trim();
-    const validMiddleName = popupNew.querySelector('.new__input--middlename').value.trim();
+    popupNew.classList.add('is-load');
+    console.log(popupNew);
+    const validSurNameInput = popupNew.querySelector('.new__input--surname');
+    const validNameInput = popupNew.querySelector('.new__input--name');
+    const validMiddleNameInput = popupNew.querySelector('.new__input--middlename');
+    const btnContacts = popupNew.querySelectorAll('.new__row-contact');
+
+    validSurNameInput.classList.remove('is-invalid');
+    validNameInput.classList.remove('is-invalid');
+    btnContacts.forEach((el) => {
+      el.classList.remove('is-invalid');
+    });
+
+    const validSurName = validSurNameInput.value.trim();
+    const validName = validNameInput.value.trim();
+    const validMiddleName = validMiddleNameInput.value.trim();
 
     const newSurName = capitalize(validSurName);
     const newName = capitalize(validName);
@@ -570,13 +770,76 @@ function addClientDB() {
       closePopupClick();
       createClients();
     } else {
-      popupAddError.innerHTML = validForm.error;
       popupAddError.classList.add('invalid');
-    }
+
+      if(validForm.errorInput === 'surname') {
+        popupAddError.innerHTML = validForm.error;
+        validSurNameInput.classList.add('is-invalid');
+        return;
+      }
+      if(validForm.errorInput === 'name') {
+        popupAddError.innerHTML = validForm.error;
+        validNameInput.classList.add('is-invalid');
+        return;
+      }
+      if(validForm.errorInput.length !== 0) {
+        let errMessage = '';
+        const btnContacts = popupNew.querySelectorAll('.new__row-contact.is-view');
+        btnContacts.forEach((el, index) => {
+          validForm.errorInput.forEach(err => {
+            if(index == err) {
+              el.classList.add('is-invalid');
+            }
+          })
+        })
+        validForm.error.forEach(err => {
+          errMessage += `<p>${err}</p>`
+        })
+        popupAddError.innerHTML = errMessage;
+        return;
+      }
+    };
+
+    popupNew.classList.remove('is-load');
   };
 
   btnAddClient.addEventListener('click', e => {
     e.preventDefault();
+
+    const validSurNameInput = popupNew.querySelector('.new__input--surname');
+    const validNameInput = popupNew.querySelector('.new__input--name');
+    const btnContacts = popupNew.querySelectorAll('.new__row-contact');
+
+    const error = popupNew.querySelector('.new__error');
+
+    validSurNameInput.addEventListener('input', () => {
+      let timerId;
+      clearTimeout(timerId);
+      timerId = setTimeout(function() {
+        validSurNameInput.classList.remove('is-invalid');
+        error.classList.remove('invalid');
+      }, 300);
+    });
+
+    validNameInput.addEventListener('input', () => {
+      let timerId;
+      clearTimeout(timerId);
+      timerId = setTimeout(function() {
+        validNameInput.classList.remove('is-invalid');
+        error.classList.remove('invalid');
+      }, 300);
+    });
+
+    btnContacts.forEach(input => {
+      input.addEventListener('input', () => {
+        let timerId;
+        clearTimeout(timerId);
+        timerId = setTimeout(function() {
+          input.classList.remove('is-invalid');
+          error.classList.remove('invalid');
+        }, 300);
+      });
+    })
 
     page.classList.add('is-popup');
     popupNew.classList.add('is-active');
@@ -587,7 +850,7 @@ function addClientDB() {
       })
     });
 
-    addContactField();
+    addContactFieldNew();
 
     popupAddClose.addEventListener('click', closePopupClick);
 
@@ -668,10 +931,28 @@ async function updateClientDB(btn = '', clientId) {
   const updateSurname = popupUpdate.querySelector('.update__input--surname');
   const updateName = popupUpdate.querySelector('.update__input--name');
   const updateMiddlename = popupUpdate.querySelector('.update__input--middlename');
-
-  const popupAddContact = popupUpdate.querySelector('.update__contact');
   const popupAddSave = popupUpdate.querySelector('.update__save');
   const popupAddInputs = popupUpdate.querySelectorAll('.update__input');
+
+  const validSurNameInput = popupUpdate.querySelector('.update__input--surname');
+  const validNameInput = popupUpdate.querySelector('.update__input--name');
+  const btnContacts = popupUpdate.querySelectorAll('.update__row-contact');
+
+  validSurNameInput.classList.remove('is-invalid');
+  validNameInput.classList.remove('is-invalid');
+  btnContacts.forEach((el) => {
+    el.classList.remove('is-invalid');
+  });
+
+  updateSubtitle.innerHTML = '';
+  updateSurname.value = '';
+  updateName.value = '';
+  updateMiddlename.value = '';
+
+  page.classList.add('is-popup');
+  popupUpdate.classList.add('is-active');
+  popupUpdate.classList.add('is-load');
+  checkHeight();
 
   let client = '';
 
@@ -685,152 +966,56 @@ async function updateClientDB(btn = '', clientId) {
     client = (await loadClient(clientId)).shift();
   }
 
+  addContactFieldUpdate(client.contacts);
   updateSubtitle.innerHTML = `ID: ${client.id}`;
   updateSurname.value = client.surname;
   updateName.value = client.name;
   updateMiddlename.value = client.middlename;
+  popupUpdate.classList.remove('is-load');
 
-  let selectChoices = [];
-
-  // if(client.contacts.length > 0) {
-  //   client.contacts.forEach(contact => {
-  //     const contactType = popupUpdate.querySelectorAll('.update__row-contact');
-
-  //     contactType.forEach(el => {
-  //       el.classList.add('is-hide');
-  //     });
-
-  //     const contactTypeSelect = contactType[0].querySelector('.update__type-contact.choices');
-  //     const contactTypeInput = contactType[0].querySelector('.update__value');
-
-  //     contactTypeSelect.innerHTML = '';
-
-  //     if(contact.type === 'Phone') {
-  //       contactType[0].classList.remove('is-hide');
-  //       contactTypeSelect.innerHTML = `<option value="Phone" selected>Телефон</option>
-  //       <option value="Email">Email</option>
-  //       <option value="VK">Vk</option>
-  //       <option value="FB">Facebook</option>
-  //       <option value="Other">Другое</option>`;
-  //       contactTypeInput.value = contact.value;
-
-  //       selectChoices.push(new Choices(contactTypeSelect, {
-  //         searchEnabled: false,
-  //         itemSelectText: '',
-  //         shouldSort: false
-  //       }));
-  //     }
-  //     if(contact.type === 'Email') {
-  //       contactType[0].classList.remove('is-hide');
-  //       contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
-  //       <option value="Email" selected>Email</option>
-  //       <option value="VK">Vk</option>
-  //       <option value="FB">Facebook</option>
-  //       <option value="Other">Другое</option>`;
-  //       contactTypeInput.value = contact.value;
-
-  //       selectChoices.push(new Choices(contactTypeSelect, {
-  //         searchEnabled: false,
-  //         itemSelectText: '',
-  //         shouldSort: false
-  //       }));
-  //     }
-  //     if(contact.type === 'VK') {
-  //       contactType[0].classList.remove('is-hide');
-  //       contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
-  //       <option value="Email">Email</option>
-  //       <option value="VK" selected>Vk</option>
-  //       <option value="FB">Facebook</option>
-  //       <option value="Other">Другое</option>`;
-  //       contactTypeInput.value = contact.value;
-
-  //       selectChoices.push(new Choices(contactTypeSelect, {
-  //         searchEnabled: false,
-  //         itemSelectText: '',
-  //         shouldSort: false
-  //       }));
-  //     }
-  //     if(contact.type === 'FB') {
-  //       contactType[0].classList.remove('is-hide');
-  //       contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
-  //       <option value="Email">Email</option>
-  //       <option value="VK">Vk</option>
-  //       <option value="FB" selected>Facebook</option>
-  //       <option value="Other">Другое</option>`;
-  //       contactTypeInput.value = contact.value;
-
-  //       selectChoices.push(new Choices(contactTypeSelect, {
-  //         searchEnabled: false,
-  //         itemSelectText: '',
-  //         shouldSort: false
-  //       }));
-  //     }
-  //     if(contact.type === 'Other') {
-  //       contactType[0].classList.remove('is-hide');
-  //       contactTypeSelect.innerHTML = `<option value="Phone">Телефон</option>
-  //       <option value="Email">Email</option>
-  //       <option value="VK">Vk</option>
-  //       <option value="FB">Facebook</option>
-  //       <option value="Other" selected>Другое</option>`;
-  //       contactTypeInput.value = contact.value;
-
-  //       selectChoices.push(new Choices(contactTypeSelect, {
-  //         searchEnabled: false,
-  //         itemSelectText: '',
-  //         shouldSort: false
-  //       }));
-  //     }
-  //   })
-
-  //   const contactTypeSelectHide = popupUpdate.querySelectorAll('.update__row-contact.is-hide .update__type-contact.choices');
-
-  //   // selectChoices.forEach(el => {
-  //   //   console.log(el);
-  //   //   // el.destroy();
-  //   // });
-
-  //   contactTypeSelectHide.forEach(newTypeContact => {
-  //     selectChoices.push(new Choices(newTypeContact, {
-  //       searchEnabled: false,
-  //       itemSelectText: '',
-  //       shouldSort: false
-  //     }));
-  //   });
-
-  //   // selectChoices.forEach(el => {
-  //   //   el.init();
-  //   // });
-  // }
-
-  // function addContactField() {
-  //   checkHeight();
-  //   const newContactHide = document.querySelectorAll('.update__row-contact.is-hide');
-  //   if (newContactHide.length > 1) {
-  //     newContactHide[0].classList.remove('is-hide');
-  //     newContactHide[0].classList.add('is-view');
-
-  //     const btnContactDelete = newContactHide[0].querySelector('.update__delete-contact');
-
-  //     btnContactDelete.addEventListener('click', () => {
-  //       checkHeight();
-  //       btnContactDelete.parentElement.classList.add('is-hide');
-  //       btnContactDelete.parentElement.classList.remove('is-view');
-  //       const input = btnContactDelete.parentElement.querySelector('.update__value');
-  //       input.value = '';
-  //     })
-  //   } else if(newContactHide.length === 1) {
-  //     newContactHide[0].classList.remove('is-hide');
-  //     newContactHide[0].classList.add('is-view');
-  //     popupAddContact.classList.add('is-disable');
-  //   }
-  // };
-
-  // popupAddContact.addEventListener('click', addContactField);
-
-  page.classList.add('is-popup');
-  popupUpdate.classList.add('is-active');
+  const btnContactDelete = popupUpdate.querySelectorAll('.update__row-contact.is-view .update__delete-contact');
+  btnContactDelete.forEach(btn => {
+    btn.addEventListener('click', () => {
+      checkHeight();
+      btn.parentElement.classList.add('is-hide');
+      btn.parentElement.classList.remove('is-view');
+      const input = btn.parentElement.querySelector('.update__value');
+      input.value = '';
+    })
+  })
 
   checkHeight();
+
+  const error = popupUpdate.querySelector('.update__error');
+
+  validSurNameInput.addEventListener('input', () => {
+    let timerId;
+    clearTimeout(timerId);
+    timerId = setTimeout(function() {
+      validSurNameInput.classList.remove('is-invalid');
+      error.classList.remove('invalid');
+    }, 300);
+  });
+
+  validNameInput.addEventListener('input', () => {
+    let timerId;
+    clearTimeout(timerId);
+    timerId = setTimeout(function() {
+      validNameInput.classList.remove('is-invalid');
+      error.classList.remove('invalid');
+    }, 300);
+  });
+
+  btnContacts.forEach(input => {
+    input.addEventListener('input', () => {
+      let timerId;
+      clearTimeout(timerId);
+      timerId = setTimeout(function() {
+        input.classList.remove('is-invalid');
+        error.classList.remove('invalid');
+      }, 300);
+    });
+  });
 
   const popupUpdateClose = popupUpdate.querySelector('.update__close');
   const popupUpdateDelete = popupUpdate.querySelector('.update__delete');
@@ -882,15 +1067,28 @@ async function updateClientDB(btn = '', clientId) {
         newContactInput.value = '';
       }
     });
-    popupAddContact.removeEventListener('click', addContactField);
-    popupAddContact.classList.remove('is-disable');
+
     popupAddError.classList.remove('invalid');
+
+    client = '';
   };
 
-  async function saveClient() {
-    const validSurName = popupUpdate.querySelector('.update__input--surname').value.trim();
-    const validName = popupUpdate.querySelector('.update__input--name').value.trim();
-    const validMiddleName = popupUpdate.querySelector('.update__input--middlename').value.trim();
+  async function saveClientUpdate() {
+    popupUpdate.classList.add('is-load');
+    const validSurNameInput = popupUpdate.querySelector('.update__input--surname');
+    const validNameInput = popupUpdate.querySelector('.update__input--name');
+    const validMiddleNameInput = popupUpdate.querySelector('.update__input--middlename');
+    const btnContacts = popupUpdate.querySelectorAll('.update__row-contact');
+
+    validSurNameInput.classList.remove('is-invalid');
+    validNameInput.classList.remove('is-invalid');
+    btnContacts.forEach((el) => {
+      el.classList.remove('is-invalid');
+    });
+
+    const validSurName = validSurNameInput.value.trim();
+    const validName = validNameInput.value.trim();
+    const validMiddleName = validMiddleNameInput.value.trim();
 
     const newSurName = capitalize(validSurName);
     const newName = capitalize(validName);
@@ -911,12 +1109,40 @@ async function updateClientDB(btn = '', clientId) {
       closePopupClick();
       createClients();
     } else {
-      popupAddError.innerHTML = validForm.error;
       popupAddError.classList.add('invalid');
+
+      if(validForm.errorInput === 'surname') {
+        popupAddError.innerHTML = validForm.error;
+        validSurNameInput.classList.add('is-invalid');
+        return;
+      }
+      if(validForm.errorInput === 'name') {
+        popupAddError.innerHTML = validForm.error;
+        validNameInput.classList.add('is-invalid');
+        return;
+      }
+      if(validForm.errorInput.length !== 0) {
+        let errMessage = '';
+        const btnContacts = popupUpdate.querySelectorAll('.update__row-contact.is-view');
+        btnContacts.forEach((el, index) => {
+          validForm.errorInput.forEach(err => {
+            if(index == err) {
+              el.classList.add('is-invalid');
+            }
+          })
+        })
+        validForm.error.forEach(err => {
+          errMessage += `<p>${err}</p>`
+        })
+        popupAddError.innerHTML = errMessage;
+        return;
+      }
     }
+
+    popupAddSave.removeEventListener('click', saveClientUpdate);
   };
 
-  popupAddSave.addEventListener('click', saveClient);
+  popupAddSave.addEventListener('click', saveClientUpdate);
 };
 
 function updateClientDBBtn() {

@@ -15,20 +15,21 @@
   &.is-active {
     opacity: 1;
     visibility: visible;
-    & .new__wrap {
-      top: auto;
-      opacity: 1;
-      bottom: -50%;
-      &.is-height {
-        top: 67%;
+    &.is-load {
+      & .update__save,
+      & .new__save {
+        background: #cccccc;
       }
     }
-    & .update__wrap {
-      top: auto;
+    & .update__wrap,
+    & .delete__wrap,
+    & .new__wrap {
+      top: 50%;
       opacity: 1;
-      bottom: -50%;
+      transform: translate(-50%, -50%);
       &.is-height {
-        top: 67%;
+        top: 0;
+        transform: translateX(-50%);
       }
     }
   }
@@ -40,7 +41,7 @@
     max-width: 450px;
     background: #FFFFFF;
     opacity: 0;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     transition: opacity .3s ease-in-out, top .3s ease-in-out;
   }
   &__title {
@@ -98,6 +99,9 @@
   &__input[data-label="label"]:focus + .new__label,
   &__input[data-label="label"]:active + .new__label {
     display: none;
+  }
+  &__input.is-invalid {
+    border-bottom: 1px solid rgb(240 106 77 / .5);
   }
   &__add {
     display: flex;
@@ -191,6 +195,12 @@
   &__row-contact.is-hide {
     display: none;
   }
+  &__row-contact.is-invalid {
+    & .new__value,
+    & .update__value {
+      border: 1px solid rgb(240 106 77 / .5);
+    }
+  }
   &__value {
     display: flex;
     align-items: center;
@@ -209,11 +219,14 @@
   &__delete-contact {
     @include btn-reset;
     position: absolute;
-    right: 30px;
+    right: 29px;
     height: 100%;
     margin-left: -1px;
     padding: 1px 6px;
-    border: 1px solid #C8C5D1;
+    border-top: 1px solid #C8C5D1;
+    border-bottom: 1px solid #C8C5D1;
+    border-right: 1px solid #C8C5D1;
+    border-left: 1px solid transparent;
     background: #E7E5EB;
     transition: border .3s ease-in-out;
   }
@@ -245,20 +258,6 @@
         fill: #F06A4D;
       }
     }
-  }
-}
-
-.update.is-active .update {
-  &__wrap {
-    top: 50%;
-    opacity: 1;
-  }
-}
-
-.delete.is-active .delete {
-  &__wrap {
-    top: 50%;
-    opacity: 1;
   }
 }
 
