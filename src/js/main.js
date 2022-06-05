@@ -134,8 +134,8 @@ async function loadClientsSearch(search = '') {
   const response = await fetch('http://localhost:5500/api/clients');
   const data = await response.json();
   const dataSearch = data.filter(item =>
-    (item.name + item.surname + item.middlename).toLowerCase().trim()
-    .includes(search.toLowerCase().trim()))
+    (item.surname + item.name + item.middlename).toLowerCase().trim()
+    .includes(search.toLowerCase().trim().split(' ').join('')))
   return dataSearch;
 };
 
@@ -1157,8 +1157,97 @@ function updateClientDBBtn() {
 // search clients in db
 searchInput.addEventListener('input', e => {
   e.preventDefault();
-  let timerId = setTimeout(function() {
-    loadPageClients();
+  let timerId = setTimeout(async function() {
+    const strSearch = searchInput.value;
+    const clients = await loadClientsSearch(strSearch);
+
+    const searchForm = document.querySelector('.header__form');
+    const headerDropdown = document.querySelector('.header__dropdown') || document.createElement('div');
+
+    headerDropdown.classList.add('header__dropdown');
+    headerDropdown.innerHTML = '';
+
+    if(clients.length > 0 && strSearch.length > 0) {
+      headerDropdown.classList.add('is-active');
+      clients.forEach(client => {
+        const headerText = document.createElement('button');
+        headerText.classList.add('header__text');
+        headerText.innerHTML = `${client.surname} ${client.name} ${client.middlename}`;
+        headerDropdown.append(headerText)
+      })
+
+      searchForm.append(headerDropdown);
+
+      const dropdownList = document.querySelectorAll('.header__text');
+
+      searchInput.addEventListener('keydown', function (event) {
+        if(event.code === "ArrowDown") {
+          dropdownList[0].focus();
+        };
+
+        if(event.code === "ArrowUp") {
+          const length = dropdownList.length - 1;
+          dropdownList[length].focus();
+        };
+
+        dropdownList.forEach((el, i) => {
+          el.addEventListener('keydown', (e) => {
+            if(e.code === "ArrowDown") {
+              dropdownList.forEach((item, index) => {
+                if(i === index) {
+                  if(i < dropdownList.length - 1) {
+                    dropdownList[++index].focus();
+                  } else {
+                    dropdownList[0].focus();
+                  }
+                }
+              });
+            };
+          })
+        });
+
+        dropdownList.forEach((el, i) => {
+          el.addEventListener('keydown', (e) => {
+            if(e.code === "ArrowUp") {
+              dropdownList.forEach((item, index) => {
+                if(i === index) {
+                  if(i > 0) {
+                    dropdownList[--index].focus();
+                  } else {
+                    const length = dropdownList.length - 1;
+                    dropdownList[length].focus();
+                  }
+                }
+              });
+            };
+          })
+        });
+      });
+
+      dropdownList.forEach(el => {
+        el.addEventListener('click', () => {
+          searchInput.value = el.innerHTML;
+          headerDropdown.innerHTML = '';
+          headerDropdown.classList.remove('is-active');
+          loadPageClients();
+        });
+
+      });
+
+    } else {
+      headerDropdown.innerHTML = '';
+      headerDropdown.classList.remove('is-active');
+      loadPageClients();
+    }
+
+    searchInput.addEventListener('keydown', e => {
+      if(e.code === 'Enter') {
+        headerDropdown.innerHTML = '';
+        headerDropdown.classList.remove('is-active');
+        loadPageClients();
+      }
+    })
+
     clearTimeout(timerId);
   }, 300);
 });
