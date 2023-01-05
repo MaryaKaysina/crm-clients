@@ -614,7 +614,7 @@ function createClientsElements(data) {
   } else {
     const p = document.createElement('p');
     p.classList.add('clients-not-found');
-    p.innerHTML = `Поиск не дал результатов, попробуйте уточнить ФИО клиента`;
+    p.innerHTML = `Нет данных`;
 
     if(notFoundClient === null) {
       container.insertBefore(p, mainBtn)
